@@ -2,6 +2,7 @@ import { useTheme } from '@emotion/react';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const Login = () => {
   const theme = useTheme();
@@ -9,9 +10,15 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    console.log('Logging in...');
+  const handleLogin = async () => {
+    const userData = await axios.post('/api/auth/local', {
+      identifier: email,
+      password: password,
+    });
+
+    console.log(userData);
   };
+
   return (
     <Box
       sx={{
