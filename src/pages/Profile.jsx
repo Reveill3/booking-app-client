@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { IconButton } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
@@ -16,57 +16,122 @@ import { FileUploader } from 'react-drag-drop-files';
 import ClearIcon from '@mui/icons-material/Clear';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
+import useFetch from '../hooks/useFetch';
+import axios from 'axios';
 
 const user = {
   id: 1,
 };
 
 const Profile = () => {
-  const { data, loading, error } = {
-    data: {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'test@test.net',
-      phone: '123-456-7890',
-      address: '123 Main St',
-      insurance1: 'https://picsum.photos/200',
-      insurance2: 'https://picsum.photos/200',
-    },
-    loading: false,
-    error: null,
-  };
+  const { data, loading, error } = useFetch(`/api/users/me`, 'auth');
 
-  const [firstName, setFirstName] = useState(data?.firstName || '');
-  const [lastName, setLastName] = useState(data?.lastName || '');
-  const [email, setEmail] = useState(data?.email || '');
-  const [phone, setPhone] = useState(data?.phone || '');
-  const [address, setAddress] = useState(data?.address || '');
-  const [files, setFiles] = useState([]);
+  const [inputs, setInputs] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    insurance: [],
+    files: [],
+  });
+
   const [insuranceError, setInsuranceError] = useState(false);
+  const [uploadError, setUploadError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   const matches = useMediaQuery(useTheme().breakpoints.up('sm'));
 
   const navigate = useNavigate();
+  useEffect(() => {
+    setInputs({
+      firstName: data?.first_name,
+      lastName: data?.last_name,
+      email: data?.email,
+      phone: data?.phone,
+      address: data?.address,
+      insurance1: data?.insurance1,
+      insurance2: data?.insurance2,
+      files: [],
+    });
+  }, [data]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    this.setState({ [name]: value });
+    console.log(name, value);
+    setInputs((prev) => {
+      console.log(prev);
+      return { ...prev, [name]: value };
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('submitting...');
+    try {
+      if (inputs.files.length > 0) {
+        const insuranceData = new FormData();
+        insuranceData.append('files', inputs.files[0]);
+        if (inputs.files[1]) {
+          insuranceData.append('files', inputs.files[1]);
+        }
+        const insurance = await axios.post(
+          `${process.env.REACT_APP_API_URL}/upload`,
+          insuranceData,
+          {
+            headers: {
+              Authorization: 'Bearer ' + localStorage.getItem('token'),
+            },
+          }
+        );
+        const updated = await axios.put(
+          `${process.env.REACT_APP_API_URL}/user/me`,
+
+          {
+            first_name: inputs.firstName,
+            last_name: inputs.lastName,
+            email: inputs.email,
+            phone: inputs.phone,
+            address: inputs.address,
+            insurance1: insurance?.data[0]?.url,
+            insurance2: insurance?.data[1]?.url,
+          },
+          {
+            headers: {
+              Authorization: 'Bearer ' + localStorage.getItem('token'),
+            },
+          }
+        );
+        return;
+      }
+
+      const updated = await axios.put(
+        `${process.env.REACT_APP_API_URL}/user/me`,
+
+        {
+          first_name: inputs.firstName,
+          last_name: inputs.lastName,
+          email: inputs.email,
+          phone: inputs.phone,
+          address: inputs.address,
+        },
+        {
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleFileAdd = (newFiles) => {
+    console.log(newFiles);
     setInsuranceError(false);
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    setInputs((prev) => ({ ...prev, files: [...prev.files, ...newFiles] }));
   };
 
-  console.log(files);
-
+  console.log(inputs.files);
   return (
     <Container maxWidth='lg'>
       <Box sx={{ display: 'flex', marginTop: '50px', marginBottom: '50px' }}>
@@ -74,44 +139,39 @@ const Profile = () => {
           <Box gap={5} display='flex'>
             <TextField
               name='firstName'
-              value={firstName}
+              value={inputs.firstName}
               label='First Name'
               variant='outlined'
               onChange={handleChange}
-              placeholder={data.firstName}
             />
             <TextField
               name='lastName'
-              value={lastName}
+              value={inputs.lastName}
               label='Last Name'
               variant='outlined'
               onChange={handleChange}
-              placeholder={data.lastName}
             />
           </Box>
           <TextField
             name='email'
-            value={email}
+            value={inputs.email}
             label='Email'
             variant='outlined'
             onChange={handleChange}
-            placeholder={data.email}
           />
           <TextField
             name='phone'
-            value={phone}
+            value={inputs.phone}
             label='Phone'
             variant='outlined'
             onChange={handleChange}
-            placeholder={data.phone}
           />
           <TextField
             name='address'
-            value={address}
+            value={inputs.address}
             label='Address'
             variant='outlined'
             onChange={handleChange}
-            placeholder={data.address}
           />
           <Box
             sx={{
@@ -145,10 +205,8 @@ const Profile = () => {
                     padding: '10px',
                   }}
                 >
-                  {files.length > 0 ? (
-                    files.map((file) => {
-                      const img = URL.createObjectURL(file);
-                      console.log(file);
+                  {inputs.files?.length > 0 ? (
+                    inputs.files.map((file) => {
                       return (
                         <Box
                           sx={{
@@ -174,9 +232,10 @@ const Profile = () => {
                               right: '-5px',
                             }}
                             onClick={(e) => {
-                              setFiles((prevFiles) =>
-                                prevFiles.filter((f) => f !== file)
-                              );
+                              setInputs((prev) => ({
+                                ...prev,
+                                files: prev.files.filter((f) => f !== file),
+                              }));
                             }}
                           >
                             <ClearIcon color='error' />

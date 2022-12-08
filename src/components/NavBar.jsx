@@ -107,7 +107,7 @@ const NavBar = () => {
 
           {notAuth ? (
             <DesktopButtonGroup variant='contained'>
-              {user ? (
+              {localStorage.getItem('token') ? (
                 <>
                   <Link
                     style={{ textDecoration: 'none' }}
@@ -136,19 +136,25 @@ const NavBar = () => {
       {/* Mobile Friendly Menu */}
       <Menu open={open} anchorEl={anchorEl} onClose={handleClose}>
         <MenuItem>
-          <Link style={{ textDecoration: 'none' }} to='/login'>
+          <Link
+            style={{ textDecoration: 'none' }}
+            to={localStorage.getItem('token') ? '/reservations' : '/login'}
+          >
             <SpacedButton
               sx={{ width: '100%' }}
               onClick={() => setAnchorEl(null)}
             >
-              Login
+              {localStorage.getItem('token') ? 'Reservations' : 'Login'}
             </SpacedButton>
           </Link>
         </MenuItem>
         <MenuItem>
-          <Link style={{ textDecoration: 'none' }} to='/login'>
+          <Link
+            style={{ textDecoration: 'none' }}
+            to={localStorage.getItem('token') ? '/profile' : '/register'}
+          >
             <SpacedButton onClick={() => setAnchorEl(null)}>
-              Register
+              {localStorage.getItem('token') ? 'Profile' : 'Register'}
             </SpacedButton>
           </Link>
         </MenuItem>
