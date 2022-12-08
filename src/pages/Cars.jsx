@@ -13,57 +13,8 @@ import { useTheme } from '@emotion/react';
 import ReservationTimeline from '../components/Timeline';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
-
-const cars = [
-  {
-    id: 1,
-    make: 'Toyota',
-    model: 'Camry',
-    year: 2021,
-    unavailableDates: [],
-    dailyRate: 50,
-    primaryImg:
-      'https://res.cloudinary.com/dgplbptdj/image/upload/v1669926365/Booking%20App/Vehicles/Tesla_Creative_1_zzqhcj.jpg',
-    images: [],
-    type: 'car',
-  },
-  {
-    id: 2,
-    make: 'Tesla',
-    model: 'Model 3',
-    year: 2021,
-    unavailableDates: [],
-    dailyRate: 50,
-    primaryImg:
-      'https://res.cloudinary.com/dgplbptdj/image/upload/v1669926365/Booking%20App/Vehicles/Tesla_Creative_1_zzqhcj.jpg',
-    images: [],
-    type: 'car',
-  },
-  {
-    id: 3,
-    make: 'Subaru',
-    model: 'Outback',
-    year: 2021,
-    unavailableDates: [],
-    dailyRate: 50,
-    primaryImg:
-      'https://res.cloudinary.com/dgplbptdj/image/upload/v1669926392/Booking%20App/Vehicles/Subaru_Creative_1_cpfeqi.jpg',
-    images: [],
-    type: 'suv',
-  },
-  {
-    id: 4,
-    make: 'Maxda',
-    model: 'CX-30',
-    year: 2021,
-    unavailableDates: [],
-    dailyRate: 50,
-    primaryImg:
-      'https://res.cloudinary.com/dgplbptdj/image/upload/v1669926385/Booking%20App/Vehicles/CX-30_Creative_1_gqqihy.jpg',
-    images: [],
-    type: 'suv',
-  },
-];
+import useFetch from '../hooks/useFetch';
+import { useState } from 'react';
 
 const SelectOption = styled('div')(({ theme, position }) => ({
   backgroundImage:
@@ -80,14 +31,24 @@ const TypePickerText = styled(Typography)(({ theme }) => ({
 }));
 
 const Cars = () => {
+  const [selectedType, setSelectedType] = useState('car');
   const theme = useTheme();
   const matches = useMediaQuery(useTheme().breakpoints.up('md'));
   const navigate = useNavigate();
+
+  const { data, loading, error, reFetch } = useFetch(
+    `/cars?[filters][type][$eq]=${selectedType}]`
+  );
 
   const handleCarSelect = (id) => {
     navigate('/info', { state: { id } });
   };
 
+  const handleSelect = (type) => {
+    setSelectedType(type);
+    reFetch();
+  };
+  console.log(data);
   return (
     <div>
       <Container maxWidth='xl'>
@@ -102,7 +63,7 @@ const Cars = () => {
               </Typography>
               <Stack gap={3} mb={3}>
                 <Stack direction='row' gap={3} justifyContent='center'>
-                  <Box>
+                  <Box onClick={() => handleSelect('car')}>
                     <SelectOption position={{ x: '0px', y: '0px' }}>
                       <Box sx={{ width: '60px', height: '30px' }}></Box>
                     </SelectOption>
@@ -147,7 +108,7 @@ const Cars = () => {
           </Stack>
           <Box sx={{ flex: 4 }}>
             <Stack gap={10} mt={5} mb={5}>
-              {cars.map((vehicle) => (
+              {data?.data?.map((vehicle) => (
                 <Card
                   sx={{ backgroundColor: theme.palette.secondary.dark }}
                   key={vehicle.id}
@@ -155,14 +116,14 @@ const Cars = () => {
                   <CardMedia
                     component='img'
                     height='200'
-                    image={vehicle.primaryImg}
+                    image={vehicle.attributes.primaryImg}
                   />
                   <CardContent>
                     <Typography variant='h4' textAlign='center'>
-                      {vehicle.make} {vehicle.model}
+                      {vehicle.attributes.make} {vehicle.attributes.model}
                     </Typography>
                     <Typography variant='h5' textAlign='center' mt={3}>
-                      ${vehicle.dailyRate} / day
+                      ${vehicle.attributes.dailyRate} / day
                     </Typography>
                   </CardContent>
                   <CardActions

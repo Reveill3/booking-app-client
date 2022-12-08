@@ -5,6 +5,7 @@ import {
   Stack,
   Typography,
   Button,
+  Alert,
 } from '@mui/material';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { IconButton } from '@mui/material';
@@ -25,9 +26,10 @@ const user = {
 };
 
 const Profile = () => {
-  const { data, loading, error } = useFetch(`/api/users/me?populate=*`, 'auth');
-
-  console.log(data);
+  const { data, loading, error, reFetch } = useFetch(
+    `/api/users/me?populate=*`,
+    'auth'
+  );
 
   const [inputs, setInputs] = useState({
     firstName: '',
@@ -40,14 +42,15 @@ const Profile = () => {
   });
 
   const [insuranceError, setInsuranceError] = useState(false);
+  const [deleteError, setDeleteError] = useState(false);
   const [uploadError, setUploadError] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
   const matches = useMediaQuery(useTheme().breakpoints.up('sm'));
 
   const navigate = useNavigate();
   useEffect(() => {
-    console.log('second effect');
     setInputs({
       firstName: data?.first_name,
       lastName: data?.last_name,
@@ -60,15 +63,14 @@ const Profile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(name, value);
     setInputs((prev) => {
-      console.log(prev);
       return { ...prev, [name]: value };
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setUploadLoading(true);
     const updatedUser = {
       first_name: inputs.firstName,
       last_name: inputs.lastName,
@@ -109,36 +111,50 @@ const Profile = () => {
           },
         }
       );
+      setUploadLoading(false);
+
+      reFetch();
     } catch (error) {
       console.log(error);
     }
   };
 
   const handleFileAdd = (newFiles) => {
-    console.log(newFiles);
     setInsuranceError(false);
     setInputs((prev) => ({ ...prev, files: [...prev.files, ...newFiles] }));
   };
 
   const handleDelete = async (id) => {
-    const deletedImg = await axios.delete(
-      `${process.env.REACT_APP_API_URL}/upload/files/${id}`,
-      {
-        headers: {
-          Authorization: 'Bearer ' + localStorage.getItem('token'),
-        },
-      }
-    );
+    try {
+      setUploadLoading(true);
+      const deletedImg = await axios.delete(
+        `${process.env.REACT_APP_API_URL}/upload/files/${id}`,
+        {
+          headers: {
+            Authorization: 'Bearer ' + localStorage.getItem('token'),
+          },
+        }
+      );
+      setUploadLoading(false);
+      reFetch();
+    } catch (error) {
+      console.log(error);
+      setErrorMessage('Error deleting file');
+      setDeleteError(true);
+    }
   };
-  console.log(loading);
-  console.log(data);
   return (
     <Container maxWidth='lg'>
-      {loading || !data ? (
-        <CircularProgress />
+      {loading || !data || uploadLoading ? (
+        <Box display='flex' justifyContent='center' alignItems='center'>
+          <CircularProgress />
+        </Box>
       ) : (
         <Box sx={{ display: 'flex', marginTop: '50px', marginBottom: '50px' }}>
           <Stack sx={{ flex: 4 }} gap={5}>
+            {uploadError || deleteError ? (
+              <Alert severity='error'>{errorMessage}</Alert>
+            ) : null}
             <Box gap={5} display='flex'>
               <TextField
                 name='firstName'
@@ -226,6 +242,7 @@ const Profile = () => {
                 </Box>
               </Stack>
               <FileUploader
+                maxSize={100}
                 types={['png', 'jpg', 'pdf']}
                 handleChange={handleFileAdd}
                 multiple
