@@ -18,13 +18,16 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
 import useFetch from '../hooks/useFetch';
 import axios from 'axios';
+import CircularProgress from '@mui/material/CircularProgress';
 
 const user = {
   id: 1,
 };
 
 const Profile = () => {
-  const { data, loading, error } = useFetch(`/api/users/me`, 'auth');
+  const { data, loading, error } = useFetch(`/api/users/me?populate=*`, 'auth');
+
+  console.log(data);
 
   const [inputs, setInputs] = useState({
     firstName: '',
@@ -44,14 +47,13 @@ const Profile = () => {
 
   const navigate = useNavigate();
   useEffect(() => {
+    console.log('second effect');
     setInputs({
       firstName: data?.first_name,
       lastName: data?.last_name,
       email: data?.email,
       phone: data?.phone,
       address: data?.address,
-      insurance1: data?.insurance1,
-      insurance2: data?.insurance2,
       files: [],
     });
   }, [data]);
@@ -67,10 +69,22 @@ const Profile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const updatedUser = {
+      first_name: inputs.firstName,
+      last_name: inputs.lastName,
+      email: inputs.email,
+      phone: inputs.phone,
+      address: inputs.address,
+    };
+
+    const newImgArray = [];
     try {
       if (inputs.files.length > 0) {
         const insuranceData = new FormData();
         insuranceData.append('files', inputs.files[0]);
+        insuranceData.append('ref', 'plugin::users-permissions.user');
+        insuranceData.append('refId', data.id);
+        insuranceData.append('field', 'insuranceImgs');
         if (inputs.files[1]) {
           insuranceData.append('files', inputs.files[1]);
         }
@@ -83,37 +97,12 @@ const Profile = () => {
             },
           }
         );
-        const updated = await axios.put(
-          `${process.env.REACT_APP_API_URL}/user/me`,
-
-          {
-            first_name: inputs.firstName,
-            last_name: inputs.lastName,
-            email: inputs.email,
-            phone: inputs.phone,
-            address: inputs.address,
-            insurance1: insurance?.data[0]?.url,
-            insurance2: insurance?.data[1]?.url,
-          },
-          {
-            headers: {
-              Authorization: 'Bearer ' + localStorage.getItem('token'),
-            },
-          }
-        );
-        return;
       }
 
       const updated = await axios.put(
         `${process.env.REACT_APP_API_URL}/user/me`,
 
-        {
-          first_name: inputs.firstName,
-          last_name: inputs.lastName,
-          email: inputs.email,
-          phone: inputs.phone,
-          address: inputs.address,
-        },
+        updatedUser,
         {
           headers: {
             Authorization: 'Bearer ' + localStorage.getItem('token'),
@@ -131,146 +120,211 @@ const Profile = () => {
     setInputs((prev) => ({ ...prev, files: [...prev.files, ...newFiles] }));
   };
 
-  console.log(inputs.files);
+  const handleDelete = async (id) => {
+    const deletedImg = await axios.delete(
+      `${process.env.REACT_APP_API_URL}/upload/files/${id}`,
+      {
+        headers: {
+          Authorization: 'Bearer ' + localStorage.getItem('token'),
+        },
+      }
+    );
+  };
+  console.log(loading);
+  console.log(data);
   return (
     <Container maxWidth='lg'>
-      <Box sx={{ display: 'flex', marginTop: '50px', marginBottom: '50px' }}>
-        <Stack sx={{ flex: 4 }} gap={5}>
-          <Box gap={5} display='flex'>
+      {loading || !data ? (
+        <CircularProgress />
+      ) : (
+        <Box sx={{ display: 'flex', marginTop: '50px', marginBottom: '50px' }}>
+          <Stack sx={{ flex: 4 }} gap={5}>
+            <Box gap={5} display='flex'>
+              <TextField
+                name='firstName'
+                value={inputs.firstName}
+                label='First Name'
+                variant='outlined'
+                onChange={handleChange}
+              />
+              <TextField
+                name='lastName'
+                value={inputs.lastName}
+                label='Last Name'
+                variant='outlined'
+                onChange={handleChange}
+              />
+            </Box>
             <TextField
-              name='firstName'
-              value={inputs.firstName}
-              label='First Name'
+              name='email'
+              value={inputs.email}
+              label='Email'
               variant='outlined'
               onChange={handleChange}
             />
             <TextField
-              name='lastName'
-              value={inputs.lastName}
-              label='Last Name'
+              name='phone'
+              value={inputs.phone}
+              label='Phone'
               variant='outlined'
               onChange={handleChange}
             />
-          </Box>
-          <TextField
-            name='email'
-            value={inputs.email}
-            label='Email'
-            variant='outlined'
-            onChange={handleChange}
-          />
-          <TextField
-            name='phone'
-            value={inputs.phone}
-            label='Phone'
-            variant='outlined'
-            onChange={handleChange}
-          />
-          <TextField
-            name='address'
-            value={inputs.address}
-            label='Address'
-            variant='outlined'
-            onChange={handleChange}
-          />
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column',
-              gap: 2,
-            }}
-          >
-            <Typography variant='h6'>
-              Insurance Card (Two Files Only)
-            </Typography>
-            <FileUploader
-              types={['png', 'jpg', 'pdf']}
-              handleChange={handleFileAdd}
-              multiple
-              onTypeError={() => {
-                setInsuranceError(true);
-                setErrorMessage('File type not supported');
+            <TextField
+              name='address'
+              value={inputs.address}
+              label='Address'
+              variant='outlined'
+              onChange={handleChange}
+            />
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column',
+                gap: 2,
               }}
-              children={
-                <Box
-                  sx={{
-                    border: '5px dotted black',
-                    height: '150px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '10px',
-                    padding: '10px',
-                  }}
-                >
-                  {inputs.files?.length > 0 ? (
-                    inputs.files.map((file) => {
+            >
+              <Typography variant='h6'>
+                Insurance Card (Two Files Only)
+              </Typography>
+              <Stack direction='row' gap={2}>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <Typography mb={3} textAlign='center'>
+                    Current Insurance Uploaded
+                  </Typography>
+                  <Stack direction='row' gap={3}>
+                    {data.insuranceImgs?.map((image) => {
                       return (
                         <Box
+                          key={image.id}
                           sx={{
                             position: 'relative',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             flexDirection: 'column',
+                            marginRight: '10px',
                           }}
                         >
-                          {file.type === 'application/pdf' ? (
+                          {image.mime === 'application/pdf' ? (
                             <PictureAsPdfIcon sx={{ fontSize: '50px' }} />
                           ) : (
                             <InsertPhotoIcon sx={{ fontSize: '50px' }} />
                           )}
-                          <Typography variant='subtitle1' textAlign='center'>
-                            {file.name}
-                          </Typography>
-                          <IconButton
-                            sx={{
-                              position: 'absolute',
-                              top: '-5px',
-                              right: '-5px',
-                            }}
-                            onClick={(e) => {
-                              setInputs((prev) => ({
-                                ...prev,
-                                files: prev.files.filter((f) => f !== file),
-                              }));
-                            }}
+                          <Typography>{image.name}</Typography>
+                          <Button
+                            color='error'
+                            onClick={() => handleDelete(image.id)}
                           >
-                            <ClearIcon color='error' />
-                          </IconButton>
+                            Delete
+                          </Button>
                         </Box>
                       );
-                    })
-                  ) : (
-                    <Box sx={{ cursor: 'pointer' }}>
-                      <Box sx={{ width: '100%', textAlign: 'center' }}>
-                        <AttachFileIcon
-                          sx={{
-                            fontSize: '50px',
-                          }}
-                        />
-                      </Box>
-                      <Typography variant='subtitle2'>
-                        Drag and Drop Insurance Card Images
-                      </Typography>
-                    </Box>
-                  )}
+                    })}
+                  </Stack>
                 </Box>
-              }
-            />
-            {insuranceError && (
-              <Typography color='error' variant='subtitle2'>
-                {errorMessage}
-              </Typography>
-            )}
-          </Box>
-          <Button variant='contained' onClick={handleSubmit}>
-            Update Info
-          </Button>
-        </Stack>
-      </Box>
+              </Stack>
+              <FileUploader
+                types={['png', 'jpg', 'pdf']}
+                handleChange={handleFileAdd}
+                multiple
+                onTypeError={() => {
+                  setInsuranceError(true);
+                  setErrorMessage('File type not supported');
+                }}
+                children={
+                  <Box
+                    sx={{
+                      border: '5px dotted black',
+                      height: '150px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '10px',
+                      padding: '10px',
+                    }}
+                  >
+                    {inputs.files?.length > 0 ? (
+                      inputs.files.map((file) => {
+                        return (
+                          <Box
+                            key={file.name}
+                            sx={{
+                              position: 'relative',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              flexDirection: 'column',
+                            }}
+                          >
+                            {file.type === 'application/pdf' ? (
+                              <PictureAsPdfIcon sx={{ fontSize: '50px' }} />
+                            ) : (
+                              <InsertPhotoIcon sx={{ fontSize: '50px' }} />
+                            )}
+                            <Typography variant='subtitle1' textAlign='center'>
+                              {file.name}
+                            </Typography>
+                            <IconButton
+                              sx={{
+                                position: 'absolute',
+                                top: '-5px',
+                                right: '-5px',
+                              }}
+                              onClick={(e) => {
+                                setInputs((prev) => ({
+                                  ...prev,
+                                  files: prev.files.filter((f) => f !== file),
+                                }));
+                              }}
+                            >
+                              <ClearIcon color='error' />
+                            </IconButton>
+                          </Box>
+                        );
+                      })
+                    ) : (
+                      <Box sx={{ cursor: 'pointer' }}>
+                        <Box sx={{ width: '100%', textAlign: 'center' }}>
+                          <AttachFileIcon
+                            sx={{
+                              fontSize: '50px',
+                            }}
+                          />
+                        </Box>
+                        <Typography variant='subtitle2'>
+                          Drag and Drop Insurance Card Images
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                }
+              />
+              <Button
+                color='error'
+                variant='contained'
+                onClick={() =>
+                  setInputs((prev) => ({
+                    ...prev,
+                    files: [],
+                  }))
+                }
+              >
+                Reset Insurance Uploads (Wont Delete Current Insurance)
+              </Button>
+              {insuranceError && (
+                <Typography color='error' variant='subtitle2'>
+                  {errorMessage}
+                </Typography>
+              )}
+            </Box>
+            <Button variant='contained' onClick={handleSubmit}>
+              Update Info
+            </Button>
+          </Stack>
+        </Box>
+      )}
     </Container>
   );
 };
