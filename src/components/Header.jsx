@@ -82,8 +82,6 @@ const Header = () => {
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
 
-  const navigate = useNavigate();
-
   // Combine Dates and times
   // console.log(
   //   new Date(
@@ -92,6 +90,28 @@ const Header = () => {
   //       new Date(startTime).toLocaleTimeString()
   //   )
   // );
+  const navigate = useNavigate();
+  const checkAvailability = () => {
+    const combinedStart = new Date(
+      new Date(dateRange.startDate).toLocaleDateString() +
+        ' ' +
+        new Date(startTime).toLocaleTimeString()
+    );
+
+    const combinedEnd = new Date(
+      new Date(dateRange.endDate).toLocaleDateString() +
+        ' ' +
+        new Date(endTime).toLocaleTimeString()
+    );
+
+    navigate('/cars', {
+      state: {
+        location,
+        endDate: combinedEnd,
+        startDate: combinedStart,
+      },
+    });
+  };
 
   console.log(startTime);
   console.log(endTime);
@@ -201,7 +221,7 @@ const Header = () => {
           <Button
             sx={{ height: '50%' }}
             variant='contained'
-            onClick={() => navigate('/cars')}
+            onClick={checkAvailability}
           >
             Check Availability
           </Button>
