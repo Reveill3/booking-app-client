@@ -26,6 +26,15 @@ const user = {
 };
 
 const Profile = () => {
+  const navigate = useNavigate();
+
+  if (
+    !localStorage.getItem('token') ||
+    Date.now() > localStorage.getItem('expiresAt')
+  ) {
+    navigate('/login');
+  }
+
   const { data, loading, error, reFetch } = useFetch(
     `/api/users/me?populate=*`,
     'auth'
@@ -44,12 +53,14 @@ const Profile = () => {
   const [insuranceError, setInsuranceError] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
   const [uploadError, setUploadError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [password, setPassword] = useState('');
+  const [password2, setPassword2] = useState('');
 
   const matches = useMediaQuery(useTheme().breakpoints.up('sm'));
 
-  const navigate = useNavigate();
   useEffect(() => {
     setInputs({
       firstName: data?.first_name,
@@ -192,6 +203,7 @@ const Profile = () => {
               variant='outlined'
               onChange={handleChange}
             />
+
             <Box
               sx={{
                 display: 'flex',
@@ -338,6 +350,17 @@ const Profile = () => {
             </Box>
             <Button variant='contained' onClick={handleSubmit}>
               Update Info
+            </Button>
+            <Button
+              variant='contained'
+              color='secondary'
+              onClick={() => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('expiresAt');
+                navigate('/');
+              }}
+            >
+              LOGOUT
             </Button>
           </Stack>
         </Box>

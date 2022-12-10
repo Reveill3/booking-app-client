@@ -3,6 +3,7 @@ import { Box, Button, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Link, redirect, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import moment from 'moment';
 
 const Login = () => {
   const theme = useTheme();
@@ -20,7 +21,12 @@ const Login = () => {
         identifier: email,
         password: password,
       });
+      console.log(userData);
       localStorage.setItem('token', userData.data.jwt);
+      localStorage.setItem(
+        'expiresAt',
+        moment(Date.now()).add(30, 'seconds').valueOf()
+      );
       navigate('/');
     } catch (error) {
       setError(true);

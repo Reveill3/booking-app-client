@@ -16,6 +16,7 @@ import Checkout from './pages/Checkout';
 import Profile from './pages/Profile';
 import Reservations from './pages/Reservations';
 import Edit from './pages/Edit';
+import { useEffect } from 'react';
 
 // Hour 2 Start
 const theme = createTheme({
@@ -34,6 +35,12 @@ const theme = createTheme({
 });
 
 const Layout = () => {
+  useEffect(() => {
+    if (localStorage.getItem('expiresAt') < Date.now()) {
+      localStorage.removeItem('expiresAt');
+      localStorage.removeItem('token');
+    }
+  }, []);
   return (
     <div className='app'>
       <NavBar />
