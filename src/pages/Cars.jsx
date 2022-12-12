@@ -47,7 +47,21 @@ const Cars = () => {
   );
 
   const handleCarSelect = (id) => {
-    navigate('/info', { state: { id } });
+    const state = {
+      id,
+      location: {
+        name: location.state.location.name,
+        id: location.state.location.id,
+      },
+      startDate: location.state.startDate,
+      endDate: location.state.endDate,
+    };
+    if (localStorage.getItem('token')) {
+      navigate('/checkout', { state });
+      return;
+    }
+
+    navigate('/info', { state });
   };
 
   const handleSelect = (type) => {

@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
+import useFetch from '../hooks/useFetch';
 
 const StyledVideo = styled('video')({
   width: '100%',
@@ -82,14 +83,8 @@ const Header = () => {
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
 
-  // Combine Dates and times
-  // console.log(
-  //   new Date(
-  //     new Date(startTime).toLocaleDateString() +
-  //       ' ' +
-  //       new Date(startTime).toLocaleTimeString()
-  //   )
-  // );
+  const { data, loading, error } = useFetch('/locations');
+
   const navigate = useNavigate();
   const checkAvailability = () => {
     const combinedStart = new Date(
@@ -106,15 +101,16 @@ const Header = () => {
 
     navigate('/cars', {
       state: {
-        location,
+        location: {
+          id: location,
+          name: data?.data.find((loc) => loc.id === location).attributes.name,
+        },
         endDate: combinedEnd,
         startDate: combinedStart,
       },
     });
   };
 
-  console.log(startTime);
-  console.log(endTime);
   return (
     <Box
       sx={{
@@ -162,8 +158,15 @@ const Header = () => {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 >
-                  <MenuItem value='DFW'>DFW Airport</MenuItem>
-                  <MenuItem value='STOVALL'>Stovall Park Arlington</MenuItem>
+                  {data?.data.map((location) => {
+                    if (location.attributes.visible) {
+                      return (
+                        <MenuItem key={location.id} value={location.id}>
+                          {location.attributes.name}
+                        </MenuItem>
+                      );
+                    }
+                  })}
                 </StyledSelect>
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                   <Typography variant='h6' color={theme.palette.primary.main}>

@@ -25,7 +25,7 @@ const Login = () => {
       localStorage.setItem('token', userData.data.jwt);
       localStorage.setItem(
         'expiresAt',
-        moment(Date.now()).add(30, 'seconds').valueOf()
+        moment(Date.now()).add(7, 'days').valueOf()
       );
       navigate('/');
     } catch (error) {

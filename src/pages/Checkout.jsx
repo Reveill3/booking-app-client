@@ -11,12 +11,15 @@ import BookingSummary from '../components/BookingSummary';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import format from 'date-fns/format';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { isSameDateError } from '@mui/x-date-pickers/internals/hooks/validation/useDateValidation';
+import CircularProgress from '@mui/material/CircularProgress';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import useFetch from '../hooks/useFetch';
+import moment from 'moment';
+import qs from 'qs';
 
 const reservation = {
   vehicle: 1,
@@ -33,9 +36,56 @@ const TermsLink = styled(Link)({
 });
 
 const Checkout = () => {
+  const location = useLocation();
+  const {
+    data: vehicle,
+    loading: vehicleLoading,
+    error: vehicleError,
+  } = useFetch(`/cars/${location.state.id}`);
+
+  const addOnQuery = qs.stringify(
+    {
+      filters: {
+        $or: [
+          {
+            locations: {
+              id: { $eq: location.state.location.id },
+            },
+          },
+          {
+            locations: {
+              name: { $eq: 'all' },
+            },
+          },
+          {
+            cars: {
+              id: { $eq: location.state.location.id },
+            },
+          },
+        ],
+      },
+    },
+    {
+      encodeValuesOnly: true, // prettify URL
+    }
+  );
+
+  const {
+    data: addOns,
+    loading: addOnsLoading,
+    error: addOnsError,
+  } = useFetch(`/add-ons?populate=*&${addOnQuery}`);
+  if (!addOnsLoading) {
+    console.log(addOns);
+  }
+
   const [agree, setAgree] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(true);
+
+  const totalDays = moment(location.state.endDate)
+    .diff(location.state.startDate, 'days', true)
+    .toFixed(2);
 
   const MS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -53,6 +103,17 @@ const Checkout = () => {
     } else {
       setError(true);
     }
+  };
+  const summaryData = {
+    vehicle: vehicle?.data.attributes,
+    addOns: addOns?.data,
+    reservation: {
+      startDate: location.state.startDate,
+      endDate: location.state.endDate,
+      totalDays: totalDays,
+      subTotal: vehicle?.data.attributes.dailyRate * totalDays,
+      locationName: location.state.location.name,
+    },
   };
   return (
     <>
@@ -142,7 +203,11 @@ const Checkout = () => {
             </Button>
           </Stack>
           <Box>
-            <BookingSummary />
+            {addOnsLoading || vehicleLoading ? (
+              <CircularProgress />
+            ) : (
+              <BookingSummary data={summaryData} />
+            )}
           </Box>
         </Stack>
       </Container>
