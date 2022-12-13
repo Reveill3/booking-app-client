@@ -20,12 +20,7 @@ import { useTheme } from '@mui/material/styles';
 import useFetch from '../hooks/useFetch';
 import moment from 'moment';
 import qs from 'qs';
-
-const reservation = {
-  vehicle: 1,
-  startDate: '2021-12-01 13:00:00',
-  endDate: '2021-12-05 14:00:00',
-};
+import axios from 'axios';
 
 const TermsLink = styled(Link)({
   textDecoration: 'none',
@@ -97,8 +92,42 @@ const Checkout = () => {
     return format(dayBefore, 'MMM dd, yyyy hh:mm a');
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (agree) {
+      const unavailableDates = await Promise.all(
+        location.state.allDates.map((date) => {
+          return axios.post(
+            `${process.env.REACT_APP_API_URL}/unavailable-dates`,
+            {
+              data: {
+                car: location.state.id,
+                date: new Date(date),
+              },
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+            }
+          );
+        })
+      );
+      const reservation = await axios.post(
+        `${process.env.REACT_APP_API_URL}/reservations`,
+        {
+          data: {
+            car: location.state.id,
+            location: location.state.location.id,
+            start: location.state.startDate,
+            end: location.state.endDate,
+          },
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
       setSubmitted(true);
     } else {
       setError(true);
@@ -181,7 +210,7 @@ const Checkout = () => {
               <ThumbUpOffAltIcon fontSize='large' />
               <Typography variant='h6' fontWeight={300}>
                 Free cancellation before{' '}
-                <b>{oneBefore(reservation.startDate)}</b>
+                <b>{oneBefore(location.state.startDate)}</b>
               </Typography>
             </Box>
             <Box display='flex' alignItems='center'>

@@ -47,6 +47,8 @@ const Cars = () => {
   );
 
   const handleCarSelect = (id) => {
+    const startEndRemoved = alldates;
+    startEndRemoved.splice(0, 2);
     const state = {
       id,
       location: {
@@ -55,6 +57,7 @@ const Cars = () => {
       },
       startDate: location.state.startDate,
       endDate: location.state.endDate,
+      allDates: startEndRemoved,
     };
     if (localStorage.getItem('token')) {
       navigate('/checkout', { state });
