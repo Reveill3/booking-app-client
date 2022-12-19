@@ -8,82 +8,85 @@ import Paper from '@mui/material/Paper';
 import { Container, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useNavigate } from 'react-router-dom';
-
-const user = {};
-
-const reservations = [
-  {
-    id: 1,
-    start: 'Sun Dec 04 2022 20:30:28 GMT-0600 (Central Standard Time)',
-    end: 'Sun Dec 04 2022 20:30:28 GMT-0600 (Central Standard Time)',
-    car: {
-      id: 1,
-      make: 'Ford',
-      model: 'F-150',
-      year: 2021,
-    },
-    userId: 1,
-  },
-  {
-    id: 1,
-    start: 'Sun Dec 04 2022 20:30:28 GMT-0600 (Central Standard Time)',
-    end: 'Sun Dec 04 2022 20:30:28 GMT-0600 (Central Standard Time)',
-    car: {
-      id: 1,
-      make: 'Ford',
-      model: 'F-150',
-      year: 2021,
-    },
-    userId: 1,
-  },
-];
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import { Link, useNavigate } from 'react-router-dom';
+import { DateTime } from 'luxon';
+import useFetch from '../hooks/useFetch';
+import axios from 'axios';
 
 const Reservations = () => {
+  const {
+    data: reservations,
+    loading,
+    error,
+    reFetch,
+  } = useFetch('/reservations/me');
+
   const navigate = useNavigate();
+
   const handleDelete = () => {
     console.log('delete');
   };
   return (
     <Container maxWidth='lg' sx={{ marginTop: '50px', marginBottom: '50px' }}>
       <TableContainer component={Paper}>
-        <TableHead>
-          <TableRow>
-            <TableCell>Start Time</TableCell>
-            <TableCell>End Time</TableCell>
-            <TableCell>Vehicle</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {reservations.map((reservation) => (
-            <TableRow key={reservation.id}>
-              <TableCell>{reservation.start}</TableCell>
-              <TableCell>{reservation.end}</TableCell>
-              <TableCell>
-                {reservation.car.make} {reservation.car.model}{' '}
-                {reservation.car.year}
-              </TableCell>
-              <TableCell>
-                <IconButton
-                  onClick={() =>
-                    navigate(`/user/reservations/${reservation.id}`, {
-                      state: {
-                        reservation: { ...reservation },
-                      },
-                    })
-                  }
-                >
-                  <EditIcon />
-                </IconButton>
-              </TableCell>
-              <TableCell>
-                <IconButton>
-                  <DeleteIcon onClick={handleDelete} />
-                </IconButton>
-              </TableCell>
+        <Table sx={{ minWidth: 650 }} aria-label='simple table'>
+          <TableHead>
+            <TableRow>
+              <TableCell>Start Time</TableCell>
+              <TableCell>End Time</TableCell>
+              <TableCell>Vehicle</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
+          </TableHead>
+          <TableBody>
+            {reservations?.map((reservation) => {
+              return (
+                <TableRow key={reservation.id}>
+                  <TableCell>
+                    {DateTime.fromISO(reservation.start).toLocaleString(
+                      DateTime.DATETIME_MED
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {DateTime.fromISO(reservation.end).toLocaleString(
+                      DateTime.DATETIME_MED
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {`${reservation.car.make} ${reservation.car.model} ${reservation.car.year}`}
+                  </TableCell>
+                  <TableCell>
+                    <a href={reservation.stripeUrl}>
+                      <IconButton>
+                        <CreditCardIcon />
+                      </IconButton>
+                    </a>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      onClick={() =>
+                        navigate(`/user/reservations/${reservation.id}`, {
+                          state: {
+                            reservation: {
+                              ...reservation,
+                            },
+                          },
+                        })
+                      }
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton>
+                      <DeleteIcon onClick={handleDelete} />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </TableContainer>
     </Container>
   );
