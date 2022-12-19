@@ -94,33 +94,14 @@ const Checkout = () => {
 
   const handleSubmit = async () => {
     if (agree) {
-      const unavailableDates = await Promise.all(
-        location.state.allDates.map((date) => {
-          return axios.post(
-            `${process.env.REACT_APP_API_URL}/unavailable-dates`,
-            {
-              data: {
-                car: location.state.id,
-                date: new Date(date),
-              },
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-              },
-            }
-          );
-        })
-      );
       const reservation = await axios.post(
         `${process.env.REACT_APP_API_URL}/reservations`,
         {
-          data: {
-            car: location.state.id,
-            location: location.state.location.id,
-            start: location.state.startDate,
-            end: location.state.endDate,
-          },
+          car: location.state.id,
+          location: location.state.location.id,
+          start: location.state.startDate,
+          end: location.state.endDate,
+          totalDays: totalDays,
         },
         {
           headers: {
