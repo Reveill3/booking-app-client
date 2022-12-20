@@ -213,7 +213,7 @@ const Checkout = () => {
             </Button>
           </Stack>
           <Box>
-            {addOnsLoading || vehicleLoading ? (
+            {addOnsLoading || vehicleLoading || !vehicle ? (
               <CircularProgress />
             ) : (
               <BookingSummary data={summaryData} />
