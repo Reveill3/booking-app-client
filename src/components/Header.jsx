@@ -22,6 +22,9 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import useFetch from '../hooks/useFetch';
+import { BookingContext } from '../context/BookingContext';
+import { useContext } from 'react';
+import { DateTime } from 'luxon';
 
 const StyledVideo = styled('video')({
   width: '100%',
@@ -83,32 +86,51 @@ const Header = () => {
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
 
+  const { state, dispatch } = useContext(BookingContext);
+  const { vehicle } = state;
+
+  // combine dateRange.startDate with startTime and dateRange.endDate with endTime using luxon
+  const combinedStart = DateTime.fromJSDate(dateRange.startDate).set({
+    hour: startTime.getHours(),
+    minute: startTime.getMinutes(),
+  });
+
+  const combinedEnd = DateTime.fromJSDate(dateRange.endDate).set({
+    hour: endTime.getHours(),
+    minute: endTime.getMinutes(),
+  });
+
   const { data, loading, error } = useFetch('/locations');
 
   const navigate = useNavigate();
   const checkAvailability = () => {
-    const combinedStart = new Date(
-      new Date(dateRange.startDate).toLocaleDateString() +
-        ' ' +
-        new Date(startTime).toLocaleTimeString()
-    );
+    //if no location selected or date range is on same day, return
+    if (
+      location === '' ||
+      dateRange.startDate.getDate() === dateRange.endDate.getDate()
+    ) {
+      alert('Please select a location and a valid date range');
+      return;
+    }
+    dispatch({
+      type: 'SET_START_DATE',
+      payload: combinedStart.toISO(),
+    });
+    //dispatch end date to booking context
+    dispatch({
+      type: 'SET_END_DATE',
+      payload: combinedEnd.toISO(),
+    });
 
-    const combinedEnd = new Date(
-      new Date(dateRange.endDate).toLocaleDateString() +
-        ' ' +
-        new Date(endTime).toLocaleTimeString()
-    );
-
-    navigate('/cars', {
-      state: {
-        location: {
-          id: location,
-          name: data?.data.find((loc) => loc.id === location).attributes.name,
-        },
-        endDate: combinedEnd,
-        startDate: combinedStart,
+    dispatch({
+      type: 'SET_LOCATION',
+      payload: {
+        id: location,
+        name: data?.data.find((loc) => loc.id === location).attributes.name,
       },
     });
+    //if vehicle is selected, navigate to checkout else navigate to cars
+    vehicle ? navigate('/checkout') : navigate('/cars');
   };
 
   return (

@@ -10,7 +10,7 @@ import {
 import BookingSummary from '../components/BookingSummary';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import format from 'date-fns/format';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styled from '@emotion/styled';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -21,6 +21,7 @@ import useFetch from '../hooks/useFetch';
 import moment from 'moment';
 import qs from 'qs';
 import axios from 'axios';
+import { BookingContext } from '../context/BookingContext';
 
 const TermsLink = styled(Link)({
   textDecoration: 'none',
@@ -31,12 +32,13 @@ const TermsLink = styled(Link)({
 });
 
 const Checkout = () => {
-  const location = useLocation();
+  const { state, dispatch } = useContext(BookingContext);
+  const { startDate, endDate, location, vehicle, submitted, agree } = state;
   const {
-    data: vehicle,
+    data: fetchedVehicle,
     loading: vehicleLoading,
     error: vehicleError,
-  } = useFetch(`/cars/${location.state.id}`);
+  } = useFetch(`/cars/${vehicle}`);
 
   const addOnQuery = qs.stringify(
     {
@@ -44,7 +46,7 @@ const Checkout = () => {
         $or: [
           {
             locations: {
-              id: { $eq: location.state.location.id },
+              id: { $eq: location.id },
             },
           },
           {
@@ -54,7 +56,7 @@ const Checkout = () => {
           },
           {
             cars: {
-              id: { $eq: location.state.location.id },
+              id: { $eq: location.id },
             },
           },
         ],
@@ -74,13 +76,9 @@ const Checkout = () => {
     console.log(addOns);
   }
 
-  const [agree, setAgree] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(true);
 
-  const totalDays = moment(location.state.endDate)
-    .diff(location.state.startDate, 'days', true)
-    .toFixed(2);
+  const totalDays = moment(endDate).diff(startDate, 'days', true).toFixed(2);
 
   const MS_IN_DAY = 1000 * 60 * 60 * 24;
 
@@ -97,10 +95,10 @@ const Checkout = () => {
       const reservation = await axios.post(
         `${process.env.REACT_APP_API_URL}/reservations`,
         {
-          car: location.state.id,
-          location: location.state.location.id,
-          start: location.state.startDate,
-          end: location.state.endDate,
+          car: vehicle,
+          location: location.id,
+          start: startDate,
+          end: endDate,
           totalDays: totalDays,
         },
         {
@@ -109,20 +107,20 @@ const Checkout = () => {
           },
         }
       );
-      setSubmitted(true);
     } else {
       setError(true);
     }
   };
+
   const summaryData = {
-    vehicle: vehicle?.data.attributes,
+    vehicle: fetchedVehicle?.data.attributes,
     addOns: addOns?.data,
     reservation: {
-      startDate: location.state.startDate,
-      endDate: location.state.endDate,
+      startDate: startDate,
+      endDate: endDate,
       totalDays: totalDays,
-      subTotal: vehicle?.data.attributes.dailyRate * totalDays,
-      locationName: location.state.location.name,
+      subTotal: fetchedVehicle?.data.attributes.dailyRate * totalDays,
+      locationName: location.name,
     },
   };
   return (
@@ -190,16 +188,15 @@ const Checkout = () => {
             >
               <ThumbUpOffAltIcon fontSize='large' />
               <Typography variant='h6' fontWeight={300}>
-                Free cancellation before{' '}
-                <b>{oneBefore(location.state.startDate)}</b>
+                Free cancellation before <b>{oneBefore(startDate)}</b>
               </Typography>
             </Box>
             <Box display='flex' alignItems='center'>
               <Checkbox
                 checked={agree}
                 onChange={() => {
-                  setAgree(!agree);
-                  setError(!error);
+                  dispatch({ type: 'AGREE', payload: !agree });
+                  setError(!agree);
                 }}
               />
               <Typography variant='subtitle1' fontWeight={300}>
@@ -213,7 +210,7 @@ const Checkout = () => {
             </Button>
           </Stack>
           <Box>
-            {addOnsLoading || vehicleLoading || !vehicle ? (
+            {addOnsLoading || vehicleLoading || !fetchedVehicle ? (
               <CircularProgress />
             ) : (
               <BookingSummary data={summaryData} />

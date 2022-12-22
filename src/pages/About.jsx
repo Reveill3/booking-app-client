@@ -6,12 +6,37 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
+import useFetch from '../hooks/useFetch';
+import { useContext, useState } from 'react';
+import { BookingContext } from '../context/BookingContext';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const About = () => {
+  const { data, loading, error } = useFetch('/cars?[filters][featured]=true');
+  const [carSelected, setCarSelected] = useState(false);
   const theme = useTheme();
 
-  const matches = useMediaQuery(theme.breakpoints.up('sm'));
+  //use booking context
+  const { state, dispatch } = useContext(BookingContext);
 
+  // funtion to update booking context with id of selected car
+  const selectCar = (id) => {
+    if (carSelected) {
+      setCarSelected(false);
+      dispatch({
+        type: 'SET_VEHICLE',
+        payload: null,
+      });
+      return;
+    }
+    setCarSelected(true);
+    dispatch({
+      type: 'SET_VEHICLE',
+      payload: id,
+    });
+  };
+
+  const matches = useMediaQuery(theme.breakpoints.up('sm'));
   return (
     <Box>
       <Stack
@@ -64,27 +89,45 @@ const About = () => {
               Featured Vehicle
             </Typography>
           </Box>
-          <Card
-            sx={{
-              backgroundColor: theme.palette.secondary,
-            }}
-          >
-            <CardMedia
-              component='img'
-              image='https://res.cloudinary.com/ddq3k3ntz/image/upload/v1669394139/Rev%20Rentals/Tesla_Creative_1_ir1osw.jpg'
-              height='500'
-            />
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography gutterBottom variant='h3' component='div'>
-                Tesla Model 3
-              </Typography>
-            </CardContent>
-            <CardActions sx={{ justifyContent: 'center' }}>
-              <Button size='large' variant='contained' fullWidth>
-                Book Now
-              </Button>
-            </CardActions>
-          </Card>
+          {data?.data.map((car) => (
+            <Card
+              key={car.id}
+              sx={{
+                backgroundColor: theme.palette.secondary,
+              }}
+            >
+              <CardMedia
+                component='img'
+                image={car.attributes.primaryImg}
+                height='500'
+              />
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography gutterBottom variant='h3' component='div'>
+                  {car.attributes.make} {car.attributes.model}
+                </Typography>
+              </CardContent>
+              <CardActions sx={{ justifyContent: 'center' }}>
+                <Button
+                  size='large'
+                  variant='contained'
+                  color={carSelected ? 'success' : 'primary'}
+                  fullWidth
+                  onClick={() => selectCar(car.id)}
+                >
+                  {carSelected ? (
+                    <>
+                      <CheckCircleIcon />
+                      <Typography variant='button' sx={{ ml: 1 }}>
+                        Select Dates/Location above and check availability
+                      </Typography>
+                    </>
+                  ) : (
+                    'Select Car'
+                  )}
+                </Button>
+              </CardActions>
+            </Card>
+          ))}
         </Box>
       </Stack>
     </Box>

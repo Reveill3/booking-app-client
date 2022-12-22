@@ -8,8 +8,10 @@ import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Box } from '@mui/system';
+import { BookingContext } from '../context/BookingContext';
+import { useContext } from 'react';
 
 const StyledToolbar = styled(Toolbar)({
   display: 'flex',
@@ -72,6 +74,15 @@ const NavBar = () => {
     setAnchorEl(null);
   };
 
+  const { dispatch } = useContext(BookingContext);
+  const navigate = useNavigate();
+
+  const navigateHome = async () => {
+    //reset booking context and navigate to home
+    await dispatch({ type: 'RESET' });
+    navigate('/');
+  };
+
   const path = useLocation().pathname;
 
   const notAuth = path !== '/login' && path !== '/register';
@@ -96,7 +107,7 @@ const NavBar = () => {
             </Link>
           </Box>
 
-          <StyledLink to='/'>
+          <StyledLink onClick={navigateHome}>
             <img
               src='https://res.cloudinary.com/ddq3k3ntz/image/upload/v1669392582/Rev%20Rentals/White_logo_-_no_background_gbijh5.png'
               alt='logo'

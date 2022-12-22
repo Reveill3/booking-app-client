@@ -14,8 +14,9 @@ import ReservationTimeline from '../components/Timeline';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import moment from 'moment';
+import { BookingContext } from '../context/BookingContext';
 
 const SelectOption = styled('div')(({ theme, position }) => ({
   backgroundImage:
@@ -36,11 +37,11 @@ const Cars = () => {
   const theme = useTheme();
   const matches = useMediaQuery(useTheme().breakpoints.up('md'));
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const filterStart = moment(location.state.startDate)
-    .startOf('month')
-    .toDate();
+  const { state, dispatch } = useContext(BookingContext);
+  const { startDate, endDate } = state;
+
+  const filterStart = moment(startDate).startOf('month').toDate();
 
   const { data, loading, error, reFetch } = useFetch(
     `/cars?populate=*&filters[type][$eq]=${selectedType}`
@@ -49,14 +50,8 @@ const Cars = () => {
   const handleCarSelect = (id) => {
     const startEndRemoved = alldates;
     startEndRemoved.splice(0, 2);
+    dispatch({ type: 'SET_VEHICLE', payload: id });
     const state = {
-      id,
-      location: {
-        name: location.state.location.name,
-        id: location.state.location.id,
-      },
-      startDate: location.state.startDate,
-      endDate: location.state.endDate,
       allDates: startEndRemoved,
     };
     if (localStorage.getItem('token')) {
@@ -91,19 +86,16 @@ const Cars = () => {
     return dates;
   };
 
-  const alldates = getDatesInRange(
-    location.state.startDate,
-    location.state.endDate
-  );
+  const alldates = getDatesInRange(startDate, endDate);
 
   const isAvailable = (vehicle) => {
     const isFound = vehicle.attributes.unavailable_dates.data.some((date) =>
       alldates.includes(new Date(date.attributes.date).getTime())
     );
     if (vehicle.attributes.reservations.data.length > 0) {
-      const startDay = moment(location.state.startDate).startOf('day').toDate();
-      console.log(startDay.getTime(), location.state.startDate, 'COMPARE 1');
-      const endDay = moment(location.state.endDate).startOf('day').toDate();
+      const startDay = moment(startDate).startOf('day').toDate();
+      console.log(startDay.getTime(), startDate, 'COMPARE 1');
+      const endDay = moment(endDate).startOf('day').toDate();
 
       let matchedReservation;
 
@@ -150,9 +142,7 @@ const Cars = () => {
         const resEndPlusThreeHours = moment(matchedReservation.attributes.end)
           .add(3, 'hours')
           .toDate();
-        if (
-          resEndPlusThreeHours.getTime() > location.state.startDate.getTime()
-        ) {
+        if (resEndPlusThreeHours.getTime() > startDate.getTime()) {
           return false;
         }
       }
@@ -163,9 +153,7 @@ const Cars = () => {
         )
           .subtract(3, 'hours')
           .toDate();
-        if (
-          resStartMinusThreeHours.getTime() < location.state.endDate.getTime()
-        ) {
+        if (resStartMinusThreeHours.getTime() < endDate.getTime()) {
           return false;
         }
       }
