@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Reservation from './pages/Reservation';
+import BookingRoute from './components/BookingRoute';
 import CancellationPolicy from './pages/CancellationPolicy';
 import Terms from './pages/Terms';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -61,7 +62,14 @@ const router = createBrowserRouter([
       { path: '/login', element: <Login /> },
       { path: '/register', element: <Register /> },
       { path: '/info', element: <Info /> },
-      { path: '/checkout', element: <Checkout /> },
+      {
+        path: '/checkout',
+        element: (
+          <BookingRoute>
+            <Checkout />
+          </BookingRoute>
+        ),
+      },
       { path: '/cancellation', element: <CancellationPolicy /> },
       { path: '/terms', element: <Terms /> },
       { path: '/user/profile', element: <Profile /> },
