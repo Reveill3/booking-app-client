@@ -25,6 +25,7 @@ import useFetch from '../hooks/useFetch';
 import { BookingContext } from '../context/BookingContext';
 import { useContext } from 'react';
 import { DateTime } from 'luxon';
+import axios from 'axios';
 
 const StyledVideo = styled('video')({
   width: '100%',
@@ -87,7 +88,6 @@ const Header = () => {
   const [endTime, setEndTime] = useState(new Date());
 
   const { state, dispatch } = useContext(BookingContext);
-  const { vehicle } = state;
 
   // combine dateRange.startDate with startTime and dateRange.endDate with endTime using luxon
   const combinedStart = DateTime.fromJSDate(dateRange.startDate).set({
@@ -103,7 +103,7 @@ const Header = () => {
   const { data, loading, error } = useFetch('/locations');
 
   const navigate = useNavigate();
-  const checkAvailability = () => {
+  const checkAvailability = async () => {
     //if no location selected or date range is on same day, return
     if (
       location === '' ||
@@ -129,8 +129,29 @@ const Header = () => {
         name: data?.data.find((loc) => loc.id === location).attributes.name,
       },
     });
+
+    if (state.vehicle) {
+      const isAvailable = await axios.post(
+        '/api/car/isAvailable',
+        {
+          id: state.vehicle,
+          start_date: combinedStart.toISO(),
+          end_date: combinedEnd.toISO(),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
+      );
+      if (!isAvailable.data) {
+        alert('Vehicle is not available for this date range');
+        return;
+      }
+      return navigate('/checkout');
+    }
     //if vehicle is selected, navigate to checkout else navigate to cars
-    vehicle ? navigate('/checkout') : navigate('/cars');
+    return navigate('/cars');
   };
 
   return (
@@ -138,7 +159,6 @@ const Header = () => {
       sx={{
         width: '100vw',
         position: 'relative',
-        height: '100%',
         backgroundColor: theme.palette.secondary.dark,
       }}
     >

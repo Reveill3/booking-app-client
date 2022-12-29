@@ -89,6 +89,7 @@ const BookingSummary = ({ data }) => {
         }
         return (
           <Box
+            key={addOn.id}
             display='flex'
             justifyContent='space-between'
             alignItems='center'

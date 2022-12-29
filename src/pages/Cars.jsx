@@ -12,11 +12,14 @@ import styled from '@emotion/styled';
 import { useTheme } from '@emotion/react';
 import ReservationTimeline from '../components/Timeline';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import moment from 'moment';
 import { BookingContext } from '../context/BookingContext';
+import axios from 'axios';
+import { useEffect } from 'react';
+import Skeleton from '@mui/material/Skeleton';
 
 const SelectOption = styled('div')(({ theme, position }) => ({
   backgroundImage:
@@ -40,6 +43,8 @@ const Cars = () => {
 
   const { state, dispatch } = useContext(BookingContext);
   const { startDate, endDate } = state;
+  const [cars, setCars] = useState([]);
+  const [availableLoading, setAvailableLoading] = useState(false);
 
   const filterStart = moment(startDate).startOf('month').toDate();
 
@@ -88,80 +93,35 @@ const Cars = () => {
 
   const alldates = getDatesInRange(startDate, endDate);
 
-  const isAvailable = (vehicle) => {
-    const isFound = vehicle.attributes.unavailable_dates.data.some((date) =>
-      alldates.includes(new Date(date.attributes.date).getTime())
-    );
-    if (vehicle.attributes.reservations.data.length > 0) {
-      const startDay = moment(startDate).startOf('day').toDate();
-      console.log(startDay.getTime(), startDate, 'COMPARE 1');
-      const endDay = moment(endDate).startOf('day').toDate();
-
-      let matchedReservation;
-
-      const isOnStartDay = vehicle.attributes.reservations.data.some(
-        (reservation) => {
-          console.log(
-            moment(reservation.attributes.end)
-              .startOf('day')
-              .toDate()
-              .getTime(),
-            reservation.attributes.end,
-            'COMPARE 2'
-          );
-          if (
-            moment(reservation.attributes.end)
-              .startOf('day')
-              .toDate()
-              .getTime() === startDay.getTime()
-          ) {
-            matchedReservation = reservation;
-            return true;
-          }
-          return false;
-        }
-      );
-      console.log(isOnStartDay, 'START', matchedReservation);
-      const isOnEndDay = vehicle.attributes.reservations.data.some(
-        (reservation) => {
-          if (
-            moment(reservation.attributes.start)
-              .startOf('day')
-              .toDate()
-              .getTime() === endDay.getTime()
-          ) {
-            matchedReservation = reservation;
-            return true;
-          }
-          return false;
-        }
-      );
-      console.log(isOnEndDay, 'END');
-
-      if (isOnStartDay) {
-        const resEndPlusThreeHours = moment(matchedReservation.attributes.end)
-          .add(3, 'hours')
-          .toDate();
-        if (resEndPlusThreeHours.getTime() > startDate.getTime()) {
-          return false;
-        }
-      }
-
-      if (isOnEndDay) {
-        const resStartMinusThreeHours = moment(
-          matchedReservation.attributes.start
-        )
-          .subtract(3, 'hours')
-          .toDate();
-        if (resStartMinusThreeHours.getTime() < endDate.getTime()) {
-          return false;
-        }
-      }
-    }
-
-    return !isFound;
+  const isAvailable = async (vehicle) => {
+    const isAvailable = await axios.post('/api/car/isAvailable', {
+      id: vehicle,
+      start_date: startDate,
+      end_date: endDate,
+    });
+    return isAvailable.data;
   };
-  console.log(data);
+
+  useEffect(() => {
+    setAvailableLoading(true);
+    const addAvailability = async () => {
+      const filteredCars = await Promise.all(
+        data.data.map(async (car) => {
+          const available = await isAvailable(car.id);
+          return {
+            ...car,
+            available,
+          };
+        })
+      );
+
+      setCars(filteredCars.filter((car) => car.available));
+    };
+    if (data) {
+      addAvailability();
+      setAvailableLoading(false);
+    }
+  }, [data]);
 
   return (
     <div>
@@ -222,9 +182,13 @@ const Cars = () => {
           </Stack>
           <Box sx={{ flex: 4 }}>
             <Stack gap={10} mt={5} mb={5}>
-              {data?.data
-                ?.filter((vehicle) => isAvailable(vehicle))
-                .map((vehicle) => (
+              {availableLoading || loading ? (
+                <>
+                  <Skeleton variant='rectangular' width={723} height={350} />
+                  <Skeleton variant='rectangular' width={723} height={350} />
+                </>
+              ) : (
+                cars.map((vehicle) => (
                   <Card
                     sx={{ backgroundColor: theme.palette.secondary.dark }}
                     key={vehicle.id}
@@ -257,7 +221,8 @@ const Cars = () => {
                       </Button>
                     </CardActions>
                   </Card>
-                ))}
+                ))
+              )}
             </Stack>
           </Box>
         </Stack>

@@ -162,8 +162,8 @@ const Reservations = () => {
                             exit: theme.transitions.easing.easeInOut,
                           }}
                         >
-                          <IconButton>
-                            <DeleteIcon onClick={startDelete} />
+                          <IconButton onClick={startDelete}>
+                            <DeleteIcon />
                           </IconButton>
                         </Slide>
                         <Slide

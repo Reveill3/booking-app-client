@@ -3,10 +3,17 @@ import Header from '../components/Header';
 import NavBar from '../components/NavBar';
 import About from './About';
 import { Box } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import { styled, useTheme } from '@mui/material/styles';
 import Footer from '../components/Footer';
 import { useContext, useEffect } from 'react';
 import { BookingContext } from '../context/BookingContext';
+
+const StyledBox = styled(Container)(({ theme }) => ({
+  overflow: 'scroll',
+  '&::-webkit-scrollbar': { display: 'none' },
+  backgroundColor: theme.palette.secondary.dark,
+  height: '100vh',
+}));
 
 const Home = () => {
   const theme = useTheme();
@@ -14,17 +21,15 @@ const Home = () => {
   useEffect(() => {
     document.title = 'Home - Rent A Car';
     dispatch({ type: 'RESET' });
-  });
+  }, []);
   return (
-    <Box>
+    <Box sx={{ backgroundColor: theme.palette.secondary.dark }}>
       <Header />
-      <Box
-        sx={{ backgroundColor: theme.palette.secondary.dark, height: '100vh' }}
-      >
-        <Container>
+      <StyledBox>
+        <Container maxWidth='xl'>
           <About />
         </Container>
-      </Box>
+      </StyledBox>
     </Box>
   );
 };

@@ -13,11 +13,12 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const About = () => {
   const { data, loading, error } = useFetch('/cars?[filters][featured]=true');
+
   const [carSelected, setCarSelected] = useState(false);
   const theme = useTheme();
 
   //use booking context
-  const { state, dispatch } = useContext(BookingContext);
+  const { dispatch } = useContext(BookingContext);
 
   // funtion to update booking context with id of selected car
   const selectCar = (id) => {
@@ -38,12 +39,12 @@ const About = () => {
 
   const matches = useMediaQuery(theme.breakpoints.up('sm'));
   return (
-    <Box>
+    <Box sx={{ paddingBottom: '20px' }}>
       <Stack
         sx={{
           gap: '40px',
-          overflow: 'hidden',
           paddingTop: matches ? 0 : '40px',
+          height: '100%',
         }}
       >
         <Box
@@ -77,10 +78,17 @@ const About = () => {
           tortor, varius vitae massa a, egestas molestie odio. Quisque viverra
           sapien mi. Sed vitae lectus in tortor dignissim malesuada.
         </Typography>
-        <Box sx={{ display: matches ? 'block' : 'none' }}>
+        <Box
+          sx={{
+            display: matches ? 'flex' : 'none',
+            flexDirection: 'column',
+            width: '100%',
+          }}
+        >
           <Box
             sx={{
-              paddingTop: '100px',
+              paddingTop: '20px',
+              paddingBottom: '20px',
               width: '100%',
               textAlign: 'center',
             }}

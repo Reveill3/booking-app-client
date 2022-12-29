@@ -1,6 +1,12 @@
 import axios from 'axios';
 
 export const makeRequest = (type) => {
+  if (localStorage.getItem('token') === null) {
+    return axios.create({
+      baseURL: process.env.REACT_APP_API_URL,
+    });
+  }
+
   if (type === 'auth') {
     return axios.create({
       baseURL: process.env.REACT_APP_UPLOAD_URL,
@@ -9,6 +15,7 @@ export const makeRequest = (type) => {
       },
     });
   }
+
   return axios.create({
     baseURL: process.env.REACT_APP_API_URL,
     headers: {

@@ -19,7 +19,7 @@ const Footer = () => {
       sx={{
         width: '100%',
         backgroundColor: theme.palette.primary.light,
-        height: '200px',
+        minHeight: '200px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',

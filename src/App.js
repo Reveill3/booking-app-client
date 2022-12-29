@@ -17,6 +17,7 @@ import Profile from './pages/Profile';
 import Reservations from './pages/Reservations';
 import Edit from './pages/Edit';
 import { useEffect } from 'react';
+import { Stack } from '@mui/material';
 
 // Hour 2 Start
 const theme = createTheme({
@@ -42,11 +43,16 @@ const Layout = () => {
     }
   }, []);
   return (
-    <div className='app'>
+    <Stack
+      sx={{
+        height: '100vh',
+        justifyContent: 'space-between',
+      }}
+    >
       <NavBar />
       <Outlet />
       <Footer />
-    </div>
+    </Stack>
   );
 };
 

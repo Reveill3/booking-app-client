@@ -149,7 +149,7 @@ const NavBar = () => {
         <MenuItem>
           <Link
             style={{ textDecoration: 'none' }}
-            to={localStorage.getItem('token') ? '/reservations' : '/login'}
+            to={localStorage.getItem('token') ? 'user/reservations' : '/login'}
           >
             <SpacedButton
               sx={{ width: '100%' }}
@@ -162,7 +162,7 @@ const NavBar = () => {
         <MenuItem>
           <Link
             style={{ textDecoration: 'none' }}
-            to={localStorage.getItem('token') ? '/profile' : '/register'}
+            to={localStorage.getItem('token') ? 'user/profile' : '/register'}
           >
             <SpacedButton onClick={() => setAnchorEl(null)}>
               {localStorage.getItem('token') ? 'Profile' : 'Register'}

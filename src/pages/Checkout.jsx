@@ -72,11 +72,9 @@ const Checkout = () => {
     loading: addOnsLoading,
     error: addOnsError,
   } = useFetch(`/add-ons?populate=*&${addOnQuery}`);
-  if (!addOnsLoading) {
-    console.log(addOns);
-  }
 
   const [error, setError] = useState(true);
+  const [reservationLoading, setReservationLoading] = useState(false);
 
   const totalDays = moment(endDate).diff(startDate, 'days', true).toFixed(2);
 
@@ -92,6 +90,7 @@ const Checkout = () => {
 
   const handleSubmit = async () => {
     if (agree) {
+      setReservationLoading(true);
       const reservation = await axios.post(
         `${process.env.REACT_APP_API_URL}/reservations`,
         {
@@ -107,8 +106,11 @@ const Checkout = () => {
           },
         }
       );
+      dispatch({ type: 'SUBMIT', payload: true });
+      setReservationLoading(false);
     } else {
       setError(true);
+      setReservationLoading(false);
     }
   };
 
@@ -123,6 +125,7 @@ const Checkout = () => {
       locationName: location.name,
     },
   };
+
   return (
     <>
       <Container
@@ -137,7 +140,7 @@ const Checkout = () => {
         >
           <Slide
             direction='down'
-            in={agree && submitted}
+            in={submitted}
             mountOnEnter
             unmountOnExit
             timeout={750}
@@ -193,10 +196,10 @@ const Checkout = () => {
             </Box>
             <Box display='flex' alignItems='center'>
               <Checkbox
-                checked={agree}
+                checked={agree || false}
                 onChange={() => {
                   dispatch({ type: 'AGREE', payload: !agree });
-                  setError(!agree);
+                  setError(!error);
                 }}
               />
               <Typography variant='subtitle1' fontWeight={300}>
@@ -205,15 +208,28 @@ const Checkout = () => {
                 <TermsLink to='/cancellation'>Cancellation policy</TermsLink>.
               </Typography>
             </Box>
-            <Button variant='contained' onClick={handleSubmit} disabled={error}>
-              Complete Reservation
-            </Button>
+            {addOnsLoading ||
+            vehicleLoading ||
+            !fetchedVehicle ||
+            reservationLoading ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                variant='contained'
+                onClick={handleSubmit}
+                disabled={error}
+              >
+                Complete Reservation
+              </Button>
+            )}
           </Stack>
           <Box>
             {addOnsLoading || vehicleLoading || !fetchedVehicle ? (
               <CircularProgress />
             ) : (
-              <BookingSummary data={summaryData} />
+              <Box mb={15}>
+                <BookingSummary data={summaryData} />
+              </Box>
             )}
           </Box>
         </Stack>
