@@ -97,45 +97,44 @@ const About = () => {
               Featured Vehicle
             </Typography>
           </Box>
-          {data?.data.map((car) => (
-            <Card
-              key={car.id}
-              sx={{
-                backgroundColor: theme.palette.secondary,
-              }}
-            >
-              <CardMedia
-                component='img'
-                image={car.attributes.primaryImg}
-                height='500'
-              />
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography gutterBottom variant='h3' component='div'>
-                  {car.attributes.make} {car.attributes.model}
-                </Typography>
-              </CardContent>
-              <CardActions sx={{ justifyContent: 'center' }}>
-                <Button
-                  size='large'
-                  variant='contained'
-                  color={carSelected ? 'success' : 'primary'}
-                  fullWidth
-                  onClick={() => selectCar(car.id)}
-                >
-                  {carSelected ? (
-                    <>
-                      <CheckCircleIcon />
-                      <Typography variant='button' sx={{ ml: 1 }}>
-                        Select Dates/Location above and check availability
-                      </Typography>
-                    </>
-                  ) : (
-                    'Select Car'
-                  )}
-                </Button>
-              </CardActions>
-            </Card>
-          ))}
+
+          <Card
+            key={data?.data[0].id}
+            sx={{
+              backgroundColor: theme.palette.secondary,
+            }}
+          >
+            <CardMedia
+              component='img'
+              image={data?.data[0].attributes.primaryImg}
+              height='500'
+            />
+            <CardContent sx={{ textAlign: 'center' }}>
+              <Typography gutterBottom variant='h3' component='div'>
+                {data?.data[0].attributes.make} {data?.data[0].attributes.model}
+              </Typography>
+            </CardContent>
+            <CardActions sx={{ justifyContent: 'center' }}>
+              <Button
+                size='large'
+                variant='contained'
+                color={carSelected ? 'success' : 'primary'}
+                fullWidth
+                onClick={() => selectCar(data?.data[0].id)}
+              >
+                {carSelected ? (
+                  <>
+                    <CheckCircleIcon />
+                    <Typography variant='button' sx={{ ml: 1 }}>
+                      Select Dates/Location above and check availability
+                    </Typography>
+                  </>
+                ) : (
+                  'Select Car'
+                )}
+              </Button>
+            </CardActions>
+          </Card>
         </Box>
       </Stack>
     </Box>

@@ -11,7 +11,7 @@ import BookingSummary from '../components/BookingSummary';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
 import format from 'date-fns/format';
 import { useContext, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import styled from '@emotion/styled';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -34,6 +34,7 @@ const TermsLink = styled(Link)({
 const Checkout = () => {
   const { state, dispatch } = useContext(BookingContext);
   const { startDate, endDate, location, vehicle, submitted, agree } = state;
+
   const {
     data: fetchedVehicle,
     loading: vehicleLoading,
