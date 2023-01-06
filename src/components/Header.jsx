@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   FormControl,
@@ -15,7 +16,7 @@ import Paper from '@mui/material/Paper';
 import { DateRangePicker, DateRange } from 'mui-daterange-picker';
 import { useState } from 'react';
 import { FormGroup } from '@mui/material';
-import { format } from 'date-fns';
+import { format, setDate } from 'date-fns';
 import './header.css';
 import { useNavigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -86,6 +87,7 @@ const Header = () => {
   const [location, setLocation] = useState('');
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
+  const [dateError, setDateError] = useState(false);
 
   const { state, dispatch } = useContext(BookingContext);
 
@@ -107,9 +109,12 @@ const Header = () => {
     //if no location selected or date range is on same day, return
     if (
       location === '' ||
-      dateRange.startDate.getDate() === dateRange.endDate.getDate()
+      dateRange.startDate.getDate() === dateRange.endDate.getDate() ||
+      combinedStart > combinedEnd ||
+      combinedStart < DateTime.now()
     ) {
-      alert('Please select a location and a valid date range');
+      setDateError(true);
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       return;
     }
     dispatch({
@@ -162,13 +167,17 @@ const Header = () => {
         backgroundColor: theme.palette.secondary.dark,
       }}
     >
+      {dateError && (
+        <Alert severity='error'>
+          Please select a valid date range and select location.
+        </Alert>
+      )}
       <StyledVideo
         src='https://res.cloudinary.com/ddq3k3ntz/video/upload/v1669230118/Pexels_Videos_1437396_zafgx1.mp4'
         autoPlay
         loop
         muted
       />
-
       <Box
         sx={{
           position: 'absolute',
@@ -261,6 +270,7 @@ const Header = () => {
               toggle={() => setOpen(!open)}
               onChange={(dates) => setDateRange(dates)}
               closeOnClickOutside={true}
+              minDate={DateTime.now().minus({ days: 1 }).toISO()}
             />
           </Box>
           <Button

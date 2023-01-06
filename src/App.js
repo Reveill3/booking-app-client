@@ -19,6 +19,7 @@ import Reservations from './pages/Reservations';
 import Edit from './pages/Edit';
 import { useEffect } from 'react';
 import { Stack } from '@mui/material';
+import PassConfirm from './pages/PassConfirm';
 
 // Hour 2 Start
 const theme = createTheme({
@@ -66,6 +67,7 @@ const router = createBrowserRouter([
       { path: '/cars', element: <Cars /> },
       { path: '/reservation', element: <Reservation /> },
       { path: '/login', element: <Login /> },
+      { path: '/auth/confirm', element: <PassConfirm /> },
       { path: '/register', element: <Register /> },
       { path: '/info', element: <Info /> },
       {

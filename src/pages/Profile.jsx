@@ -20,10 +20,20 @@ import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
 import useFetch from '../hooks/useFetch';
 import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
+import joi from 'joi';
 
-const user = {
-  id: 1,
-};
+const schema = joi.object({
+  first_name: joi.string().pattern(/^([^0-9]*)$/),
+  last_name: joi.string().pattern(/^([^0-9]*)$/),
+  email: joi
+    .string()
+    .email({ tlds: { allow: false } })
+    .required(),
+  phone: joi
+    .string()
+    .pattern(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/),
+  address: joi.string(),
+});
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -53,11 +63,8 @@ const Profile = () => {
   const [insuranceError, setInsuranceError] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
   const [uploadError, setUploadError] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
-  const [password, setPassword] = useState('');
-  const [password2, setPassword2] = useState('');
 
   const matches = useMediaQuery(useTheme().breakpoints.up('sm'));
 
@@ -90,6 +97,15 @@ const Profile = () => {
       address: inputs.address,
     };
 
+    // validate updatedUser
+    const { error } = schema.validate(updatedUser);
+    if (error) {
+      setUploadLoading(false);
+      setErrorMessage(error.details[0].message);
+      setUploadError(true);
+      return;
+    }
+    setUploadError(false);
     const newImgArray = [];
     try {
       if (inputs.files.length > 0) {

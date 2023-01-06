@@ -89,6 +89,7 @@ const Checkout = () => {
     return format(dayBefore, 'MMM dd, yyyy hh:mm a');
   }
 
+  const addOnIds = addOns?.data.map((addOn) => addOn.id);
   const handleSubmit = async () => {
     if (agree) {
       setReservationLoading(true);
@@ -100,6 +101,7 @@ const Checkout = () => {
           start: startDate,
           end: endDate,
           totalDays: totalDays,
+          add_ons: addOnIds,
         },
         {
           headers: {
