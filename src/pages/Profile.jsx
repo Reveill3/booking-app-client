@@ -33,6 +33,8 @@ const schema = joi.object({
     .string()
     .pattern(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/),
   address: joi.string(),
+  insurance_name: joi.string().pattern(/^([^0-9]*)$/),
+  insurance_policy: joi.string(),
 });
 
 const Profile = () => {
@@ -58,6 +60,8 @@ const Profile = () => {
     address: '',
     insurance: [],
     files: [],
+    insurance_name: '',
+    insurance_policy: '',
   });
 
   const [insuranceError, setInsuranceError] = useState(false);
@@ -66,7 +70,11 @@ const Profile = () => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const matches = useMediaQuery(useTheme().breakpoints.up('sm'));
+  const theme = useTheme();
+
+  const { breakpoints } = theme;
+
+  const matches = useMediaQuery(theme.breakpoints.up('md'));
 
   useEffect(() => {
     setInputs({
@@ -76,6 +84,8 @@ const Profile = () => {
       phone: data?.phone,
       address: data?.address,
       files: [],
+      insurance_name: '',
+      insurance_policy: '',
     });
   }, [data]);
 
@@ -95,6 +105,8 @@ const Profile = () => {
       email: inputs.email,
       phone: inputs.phone,
       address: inputs.address,
+      insurance_name: inputs.insurance_name,
+      insurance_policy: inputs.insurance_policy,
     };
 
     // validate updatedUser
@@ -198,20 +210,54 @@ const Profile = () => {
                 onChange={handleChange}
               />
             </Box>
-            <TextField
-              name='email'
-              value={inputs.email}
-              label='Email'
-              variant='outlined'
-              onChange={handleChange}
-            />
-            <TextField
-              name='phone'
-              value={inputs.phone}
-              label='Phone'
-              variant='outlined'
-              onChange={handleChange}
-            />
+            <Stack
+              direction={matches ? 'row' : 'column'}
+              justifyContent='space-between'
+              gap={5}
+            >
+              <TextField
+                sx={{
+                  flex: 1,
+                }}
+                name='email'
+                value={inputs.email}
+                label='Email'
+                variant='outlined'
+                onChange={handleChange}
+              />
+              <TextField
+                sx={{
+                  flex: 1,
+                }}
+                name='insurance_policy'
+                value={inputs.insurance_policy}
+                label='Policy Number'
+                variant='outlined'
+                onChange={handleChange}
+              />
+            </Stack>
+            <Stack
+              direction={matches ? 'row' : 'column'}
+              justifyContent='space-between'
+              gap={5}
+            >
+              <TextField
+                sx={{ flex: 1 }}
+                name='phone'
+                value={inputs.phone}
+                label='Phone'
+                variant='outlined'
+                onChange={handleChange}
+              />
+              <TextField
+                sx={{ flex: 1 }}
+                name='insurance_name'
+                value={inputs.insurance_name}
+                label='Insurance Company Name'
+                variant='outlined'
+                onChange={handleChange}
+              />
+            </Stack>
             <TextField
               name='address'
               value={inputs.address}
