@@ -35,6 +35,7 @@ const schema = joi.object({
   address: joi.string(),
   insurance_name: joi.string().pattern(/^([^0-9]*)$/),
   insurance_policy: joi.string(),
+  drivers_license_number: joi.string().pattern(/^\d+$/),
 });
 
 const Profile = () => {
@@ -62,6 +63,7 @@ const Profile = () => {
     files: [],
     insurance_name: '',
     insurance_policy: '',
+    drivers_license_number: '',
   });
 
   const [insuranceError, setInsuranceError] = useState(false);
@@ -84,8 +86,9 @@ const Profile = () => {
       phone: data?.phone,
       address: data?.address,
       files: [],
-      insurance_name: '',
-      insurance_policy: '',
+      insurance_name: data?.insurance_name,
+      insurance_policy: data?.insurance_policy,
+      drivers_license_number: data?.drivers_license_number,
     });
   }, [data]);
 
@@ -107,6 +110,7 @@ const Profile = () => {
       address: inputs.address,
       insurance_name: inputs.insurance_name,
       insurance_policy: inputs.insurance_policy,
+      drivers_license_number: inputs.drivers_license_number,
     };
 
     // validate updatedUser
@@ -258,13 +262,28 @@ const Profile = () => {
                 onChange={handleChange}
               />
             </Stack>
-            <TextField
-              name='address'
-              value={inputs.address}
-              label='Address'
-              variant='outlined'
-              onChange={handleChange}
-            />
+            <Stack
+              direction={matches ? 'row' : 'column'}
+              justifyContent='space-between'
+              gap={5}
+            >
+              <TextField
+                sx={{ flex: 1 }}
+                name='address'
+                value={inputs.address}
+                label='Address'
+                variant='outlined'
+                onChange={handleChange}
+              />
+              <TextField
+                sx={{ flex: 1 }}
+                name='drivers_license_number'
+                value={inputs.drivers_license_number}
+                label='Divers License Number'
+                variant='outlined'
+                onChange={handleChange}
+              />
+            </Stack>
 
             <Box
               sx={{
