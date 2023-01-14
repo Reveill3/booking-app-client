@@ -154,12 +154,23 @@ const Cars = () => {
 
   return (
     <div>
-      <Container maxWidth='xl'>
+      <Container maxWidth='md'>
+        <Typography
+          variant='h4'
+          mb={3}
+          mt={4}
+          textAlign='center'
+          justifyContent='center'
+          alignItems='center'
+        >
+          Available Vehicles
+        </Typography>
         <Stack
           direction={matches ? 'row' : 'column'}
           sx={{ justifyContent: 'space-between' }}
         >
-          <Stack sx={{ flex: 2 }}>
+          {/* Type Picker */}
+          {/* <Stack sx={{ flex: 2 }}>
             <Box>
               <Typography variant='h4' mb={3} mt={4} textAlign='center'>
                 Type
@@ -195,20 +206,7 @@ const Cars = () => {
                 </Stack>
               </Stack>
             </Box>
-            {matches ? (
-              <>
-                <Box>
-                  <Typography variant='h4' mb={3} mt={4} textAlign='center'>
-                    Reservation Status
-                  </Typography>
-                </Box>
-
-                <Box>
-                  <ReservationTimeline />
-                </Box>
-              </>
-            ) : null}
-          </Stack>
+          </Stack> */}
           <Box sx={{ flex: 4 }}>
             <Stack gap={10} mt={5} mb={5}>
               {availableLoading || loading ? (
@@ -219,8 +217,12 @@ const Cars = () => {
               ) : (
                 cars.map((vehicle) => (
                   <Card
-                    sx={{ backgroundColor: theme.palette.secondary.dark }}
+                    sx={{
+                      backgroundColor: theme.palette.secondary.dark,
+                      borderRadius: '25px',
+                    }}
                     key={vehicle.id}
+                    raised
                   >
                     <CardMedia
                       component='img'
@@ -243,6 +245,11 @@ const Cars = () => {
                       }}
                     >
                       <Button
+                        sx={{
+                          '$:hover': {
+                            backgroundColor: theme.palette.primary.hover,
+                          },
+                        }}
                         variant='contained'
                         onClick={() =>
                           handleCarSelect(vehicle.id, vehicle.attributes)

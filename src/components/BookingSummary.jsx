@@ -34,6 +34,7 @@ const BookingSummary = ({ data }) => {
           alt=''
           width='215px'
           height='137px'
+          style={{ borderRadius: '10px' }}
         />
       </Box>
       <Typography variant='h5' fontWeight={700} textAlign='center'>
@@ -77,7 +78,7 @@ const BookingSummary = ({ data }) => {
           ${data.vehicle.dailyRate} x {data.reservation.totalDays} days
         </Typography>
         <Typography variant='subtitle1' fontWeight={400}>
-          ${data.vehicle.dailyRate * data.reservation.totalDays}
+          ${(data.vehicle.dailyRate * data.reservation.totalDays).toFixed(2)}
         </Typography>
       </Box>
       {data.addOns.map((addOn) => {

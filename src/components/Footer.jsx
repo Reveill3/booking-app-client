@@ -18,7 +18,7 @@ const Footer = () => {
     <Box
       sx={{
         width: '100%',
-        backgroundColor: theme.palette.primary.light,
+        backgroundColor: theme.palette.primary.main,
         minHeight: '200px',
         display: 'flex',
         justifyContent: { md: 'space-between', xs: 'center' },

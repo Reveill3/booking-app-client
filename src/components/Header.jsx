@@ -86,6 +86,7 @@ const Header = () => {
     startDate: new Date(),
     endDate: new Date(),
   });
+  const [bufferError, setBufferError] = useState(false);
   const [location, setLocation] = useState('');
   const [openHours, setOpenHours] = useState(7);
   const [closeHours, setCloseHours] = useState(20);
@@ -96,6 +97,7 @@ const Header = () => {
     currentTime.startOf('hour').plus({ hours: 1 }).toJSDate()
   );
   const [dateError, setDateError] = useState(false);
+  const [tripBuffer, setTripBuffer] = useState(0);
 
   const { state, dispatch } = useContext(BookingContext);
 
@@ -125,6 +127,18 @@ const Header = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       return;
     }
+
+    // check that start time is at least trip buffer from now
+    if (
+      DateTime.fromJSDate(startTime) <
+      DateTime.local().plus({ hours: tripBuffer })
+    ) {
+      setBufferError(true);
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      return;
+    }
+    setBufferError(false);
+    setDateError(false);
     // push event to GTM
     window.dataLayer.push({
       event: 'check_availability',
@@ -212,8 +226,12 @@ const Header = () => {
     const locationCloseHours = data?.data.find((loc) => loc.id === location)
       .attributes.close;
 
+    const tripBuffer = data?.data.find((loc) => loc.id === location).attributes
+      .trip_buffer;
+
     setOpenHours(locationOpenHours);
     setCloseHours(locationCloseHours);
+    setTripBuffer(tripBuffer);
   };
 
   return (
@@ -229,6 +247,11 @@ const Header = () => {
           Please select a valid date range and select location. Open from{' '}
           {DateTime.fromObject({ hour: openHours }).toFormat('h a')} to{' '}
           {DateTime.fromObject({ hour: closeHours }).toFormat('h a')}
+        </Alert>
+      )}
+      {bufferError && (
+        <Alert severity='error'>
+          Please select a start time at least {tripBuffer} hours from now
         </Alert>
       )}
       <StyledVideo

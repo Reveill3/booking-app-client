@@ -26,7 +26,7 @@ const Home = () => {
     <Box sx={{ backgroundColor: theme.palette.secondary.dark }}>
       <Header />
       <StyledBox>
-        <Container maxWidth='xl'>
+        <Container maxWidth='lg'>
           <About />
         </Container>
       </StyledBox>
