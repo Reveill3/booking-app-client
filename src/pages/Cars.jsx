@@ -52,10 +52,37 @@ const Cars = () => {
     `/cars?populate=*&filters[type][$eq]=${selectedType}`
   );
 
-  const handleCarSelect = (id) => {
+  const handleCarSelect = async (id, vehicle) => {
+    dispatch({ type: 'SET_VEHICLE', payload: id });
+    // push event to GTM
+    window.dataLayer.push({
+      event: 'checkout_view',
+      customData: {
+        vehicle: id,
+      },
+    });
+    try {
+      const logged = await axios.post(
+        'https://api.logsnag.com/v1/log',
+        {
+          project: 'revrentals',
+          channel: `interactions`,
+          event: 'View Checkout',
+          description: `User viewed checkout page for ${vehicle.make} ${vehicle.model}`,
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.REACT_APP_LOGSNAG_KEY}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+
     const startEndRemoved = alldates;
     startEndRemoved.splice(0, 2);
-    dispatch({ type: 'SET_VEHICLE', payload: id });
     const state = {
       allDates: startEndRemoved,
     };
@@ -63,8 +90,9 @@ const Cars = () => {
       navigate('/checkout', { state });
       return;
     }
-
-    navigate('/info', { state });
+    dispatch({ type: 'NEW_CUSTOMER', payload: true });
+    navigate('/register', { state });
+    return;
   };
 
   const handleSelect = (type) => {
@@ -72,6 +100,7 @@ const Cars = () => {
     reFetch();
   };
 
+  // Create array of days between start and end date where vehicle is unavailable
   const getDatesInRange = (startDate, endDate) => {
     const start = moment(startDate).startOf('day').add(1, 'days').toDate();
     const end = moment(endDate).startOf('day').subtract(1, 'days').toDate();
@@ -215,7 +244,9 @@ const Cars = () => {
                     >
                       <Button
                         variant='contained'
-                        onClick={() => handleCarSelect(vehicle.id)}
+                        onClick={() =>
+                          handleCarSelect(vehicle.id, vehicle.attributes)
+                        }
                       >
                         Book Now
                       </Button>

@@ -25,19 +25,9 @@ import { useRef, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
 
-const Reservations = () => {
-  const containerRef = useRef(null);
+const ReservationTableRow = ({ reservation, reFetch }) => {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
-  const theme = useTheme();
-  const {
-    data: reservations,
-    loading,
-    error,
-    reFetch,
-  } = useFetch('/reservations/me');
-
-  const navigate = useNavigate();
-
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const startDelete = () => {
     setDeleteConfirm(true);
   };
@@ -45,6 +35,7 @@ const Reservations = () => {
   // function to delete reservation and associated unavailable dates from strapi db
   const handleDelete = async (id) => {
     try {
+      setDeleteLoading(true);
       await axios.post(
         `/api/reservations/me/${id}`,
         {
@@ -57,10 +48,126 @@ const Reservations = () => {
         }
       );
       reFetch();
+      setDeleteLoading(false);
     } catch (error) {
       console.log(error);
     }
   };
+
+  const containerRef = useRef(null);
+  const theme = useTheme();
+
+  const navigate = useNavigate();
+
+  return (
+    <TableRow key={reservation.id}>
+      <TableCell>
+        {DateTime.fromISO(reservation.start).toLocaleString(
+          DateTime.DATETIME_MED
+        )}
+      </TableCell>
+      <TableCell>
+        {DateTime.fromISO(reservation.end).toLocaleString(
+          DateTime.DATETIME_MED
+        )}
+      </TableCell>
+      <TableCell>
+        {`${reservation.car.make} ${reservation.car.model} ${reservation.car.year}`}
+      </TableCell>
+      {reservation.status === 'awaiting_session_complete' && (
+        <TableCell>
+          {
+            <a href={reservation.stripeUrl}>
+              <IconButton>
+                <CreditCardIcon />
+              </IconButton>
+            </a>
+          }
+        </TableCell>
+      )}
+      <TableCell>
+        <IconButton
+          onClick={() =>
+            navigate(`/user/reservations/${reservation.id}`, {
+              state: {
+                reservation: {
+                  ...reservation,
+                },
+              },
+            })
+          }
+        >
+          <EditIcon />
+        </IconButton>
+      </TableCell>
+      <TableCell ref={containerRef} width={225}>
+        <Stack
+          direction='row'
+          spacing={2}
+          alignItems='center'
+          height='100%'
+          overflow='hidden'
+        >
+          <Slide
+            direction='right'
+            in={!deleteConfirm}
+            container={containerRef.current}
+            mountOnEnter
+            unmountOnExit
+            appear={false}
+            timeout={200}
+            easing={{
+              enter: theme.transitions.easing.easeInOut,
+              exit: theme.transitions.easing.easeInOut,
+            }}
+          >
+            <IconButton onClick={startDelete}>
+              <DeleteIcon />
+            </IconButton>
+          </Slide>
+          <Slide
+            container={containerRef.current}
+            direction='left'
+            in={deleteConfirm}
+            mountOnEnter
+            unmountOnExit
+            timeout={200}
+            easing={{
+              enter: theme.transitions.easing.easeInOut,
+              exit: theme.transitions.easing.easeInOut,
+            }}
+          >
+            <Stack direction='row' alignItems='center' width='80%'>
+              <IconButton
+                disabled={deleteLoading}
+                onClick={() => handleDelete(reservation.id)}
+              >
+                <CheckIcon color='success' />
+              </IconButton>
+              <IconButton
+                disabled={deleteLoading}
+                onClick={() => setDeleteConfirm(false)}
+              >
+                <ClearIcon color='error' />
+              </IconButton>
+              <Typography variant='caption' whiteSpace='nowrap'>
+                You sure?
+              </Typography>
+            </Stack>
+          </Slide>
+        </Stack>
+      </TableCell>
+    </TableRow>
+  );
+};
+
+const Reservations = () => {
+  const {
+    data: reservations,
+    loading,
+    error,
+    reFetch,
+  } = useFetch('/reservations/me');
 
   return (
     <Container maxWidth='lg' sx={{ marginTop: '50px', marginBottom: '50px' }}>
@@ -101,104 +208,10 @@ const Reservations = () => {
             <TableBody>
               {reservations?.map((reservation) => {
                 return (
-                  <TableRow key={reservation.id}>
-                    <TableCell>
-                      {DateTime.fromISO(reservation.start).toLocaleString(
-                        DateTime.DATETIME_MED
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {DateTime.fromISO(reservation.end).toLocaleString(
-                        DateTime.DATETIME_MED
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {`${reservation.car.make} ${reservation.car.model} ${reservation.car.year}`}
-                    </TableCell>
-                    {reservation.status === 'awaiting_session_complete' && (
-                      <TableCell>
-                        {
-                          <a href={reservation.stripeUrl}>
-                            <IconButton>
-                              <CreditCardIcon />
-                            </IconButton>
-                          </a>
-                        }
-                      </TableCell>
-                    )}
-                    <TableCell>
-                      <IconButton
-                        onClick={() =>
-                          navigate(`/user/reservations/${reservation.id}`, {
-                            state: {
-                              reservation: {
-                                ...reservation,
-                              },
-                            },
-                          })
-                        }
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </TableCell>
-                    <TableCell ref={containerRef} width={225}>
-                      <Stack
-                        direction='row'
-                        spacing={2}
-                        alignItems='center'
-                        height='100%'
-                        overflow='hidden'
-                      >
-                        <Slide
-                          direction='right'
-                          in={!deleteConfirm}
-                          container={containerRef.current}
-                          mountOnEnter
-                          unmountOnExit
-                          appear={false}
-                          timeout={200}
-                          easing={{
-                            enter: theme.transitions.easing.easeInOut,
-                            exit: theme.transitions.easing.easeInOut,
-                          }}
-                        >
-                          <IconButton onClick={startDelete}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Slide>
-                        <Slide
-                          container={containerRef.current}
-                          direction='left'
-                          in={deleteConfirm}
-                          mountOnEnter
-                          unmountOnExit
-                          timeout={200}
-                          easing={{
-                            enter: theme.transitions.easing.easeInOut,
-                            exit: theme.transitions.easing.easeInOut,
-                          }}
-                        >
-                          <Stack
-                            direction='row'
-                            alignItems='center'
-                            width='80%'
-                          >
-                            <IconButton
-                              onClick={() => handleDelete(reservation.id)}
-                            >
-                              <CheckIcon color='success' />
-                            </IconButton>
-                            <IconButton onClick={() => setDeleteConfirm(false)}>
-                              <ClearIcon color='error' />
-                            </IconButton>
-                            <Typography variant='caption' whiteSpace='nowrap'>
-                              You sure?
-                            </Typography>
-                          </Stack>
-                        </Slide>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
+                  <ReservationTableRow
+                    reservation={reservation}
+                    reFetch={reFetch}
+                  />
                 );
               })}
             </TableBody>

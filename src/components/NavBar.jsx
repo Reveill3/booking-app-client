@@ -21,6 +21,9 @@ const StyledToolbar = styled(Toolbar)({
 const SpacedButton = styled(Button)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,
   color: theme.palette.primary.main,
+  '&:hover': {
+    backgroundColor: theme.palette.secondary.hover,
+  },
 }));
 
 const StyledLink = styled(Link)(({ theme }) => ({

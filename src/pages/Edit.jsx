@@ -70,9 +70,10 @@ const Edit = () => {
           return;
         } else {
           //show error
+          setUpdateLoading(false);
           setDateError(true);
           setDateErrorMessage('Car is not available for those dates');
-          setUpdateLoading(false);
+
           return;
         }
       }
@@ -82,6 +83,7 @@ const Edit = () => {
       setUpdateLoading(false);
       return;
     }
+    setUpdateLoading(false);
     setDateError(true);
     setDateErrorMessage(
       'Start date must be before end date and after current date'

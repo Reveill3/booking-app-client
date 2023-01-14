@@ -1,8 +1,10 @@
 import { useTheme } from '@emotion/react';
 import { Box, Button, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { BookingContext } from '../context/BookingContext';
+import moment from 'moment';
 
 const Register = () => {
   const theme = useTheme();
@@ -11,6 +13,8 @@ const Register = () => {
   const [password2, setPassword2] = useState('');
   const [error, setError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const { state } = useContext(BookingContext);
 
   const navigate = useNavigate();
   const handleRegister = async () => {
@@ -31,7 +35,23 @@ const Register = () => {
         email,
         password,
       });
-      navigate('/');
+
+      try {
+        const userData = await axios.post('/api/auth/local', {
+          identifier: email,
+          password: password,
+        });
+        localStorage.setItem('token', userData.data.jwt);
+        localStorage.setItem(
+          'expiresAt',
+          moment(Date.now()).add(7, 'days').valueOf()
+        );
+        navigate('/');
+      } catch (error) {
+        setError(true);
+        setErrorMessage('Error Loggin In');
+      }
+      !state.new_customer ? navigate('/') : navigate('/checkout');
     } catch (error) {
       setError(true);
       setErrorMessage('Email already exists');
@@ -45,8 +65,12 @@ const Register = () => {
         justifyContent: 'center',
         alignItems: 'center',
         gap: '20px',
+        mt: '40px',
       }}
     >
+      <Typography variant='h3' fontWeight={500} textAlign='center'>
+        Create an account
+      </Typography>
       <TextField
         id='email'
         label='Email'
@@ -61,6 +85,7 @@ const Register = () => {
         id='password'
         label='Password'
         variant='outlined'
+        type='password'
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         error={error}
@@ -69,6 +94,7 @@ const Register = () => {
         id='password2'
         label='Confirm Password'
         variant='outlined'
+        type='password'
         value={password2}
         onChange={(e) => setPassword2(e.target.value)}
         error={error}
@@ -85,7 +111,7 @@ const Register = () => {
       </Link>
       <Button
         variant='contained'
-        sx={{ width: '100px', marginBottom: '20px' }}
+        sx={{ width: '100px', mb: '40px' }}
         onClick={handleRegister}
       >
         Register

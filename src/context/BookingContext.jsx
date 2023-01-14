@@ -6,7 +6,8 @@ const initialState = {
   endDate: JSON.parse(localStorage.getItem('endDate')) || null,
   location: JSON.parse(localStorage.getItem('location')) || null,
   submitted: JSON.parse(localStorage.getItem('submitted')) || false,
-  agreed: JSON.parse(localStorage.getItem('agree')) || false,
+  agreed: false,
+  new_customer: false,
 };
 
 export const BookingContext = createContext(initialState);
@@ -53,6 +54,11 @@ const BookingReducer = (state, action) => {
         ...state,
         agree: action.payload,
       };
+    case 'NEW_CUSTOMER':
+      return {
+        ...state,
+        new_customer: action.payload,
+      };
 
     default:
       return state;
@@ -69,6 +75,7 @@ export const BookingContextProvider = ({ children }) => {
     localStorage.setItem('location', JSON.stringify(state.location));
     localStorage.setItem('submitted', JSON.stringify(state.submitted));
     localStorage.setItem('agreed', JSON.stringify(state.agree));
+    localStorage.setItem('new_customer', JSON.stringify(state.new_customer));
   }, [state]);
 
   return (

@@ -63,20 +63,22 @@ const About = () => {
             Mobility. Delivered.
           </Typography>
         </Box>
+        <Typography variant='h4' component='h1' textAlign='center'>
+          Explore Dallas-Fort Worth and beyond with our reliable car rentals
+        </Typography>
         <Typography
           variant={matches ? 'h6' : 'subtitle1'}
           color={theme.palette.primary.dark}
           mt={5}
         >
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam maximus
-          eget purus vitae laoreet. Mauris id purus a nisl posuere pretium. Nunc
-          a velit nec ante dignissim volutpat ut ac nibh. Sed sodales sit amet
-          felis et feugiat. Nunc ullamcorper, odio quis ullamcorper tempus, leo
-          nisl euismod neque, eu pellentesque lorem tellus eu elit. Pellentesque
-          et lorem elementum, lacinia sem ut, hendrerit lacus. Vestibulum
-          faucibus non odio tempor ornare. Vivamus eget dui nisi. Nunc lorem
-          tortor, varius vitae massa a, egestas molestie odio. Quisque viverra
-          sapien mi. Sed vitae lectus in tortor dignissim malesuada.
+          Looking for an affordable and reliable car rental in the Dallas-Fort
+          Worth area? Our local car rental company offers several vehicles to
+          suit your needs and budget. Whether you're visiting for business or
+          planning a road trip adventure, we have the perfect rental car for
+          you. Convenient pick-up and drop-off locations, including Dallas-Fort
+          Worth International Airport, makes renting a car from us easy. Trust
+          in our commitment to a personable customer service for a hassle-free
+          car rental experience in Dallas-Fort Worth.
         </Typography>
         <Box
           sx={{
@@ -121,6 +123,9 @@ const About = () => {
                 color={carSelected ? 'success' : 'primary'}
                 fullWidth
                 onClick={() => selectCar(data?.data[0].id)}
+                sx={{
+                  '&:hover': { backgroundColor: theme.palette.primary.hover },
+                }}
               >
                 {carSelected ? (
                   <>

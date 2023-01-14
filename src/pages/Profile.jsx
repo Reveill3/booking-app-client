@@ -23,19 +23,29 @@ import CircularProgress from '@mui/material/CircularProgress';
 import joi from 'joi';
 
 const schema = joi.object({
-  first_name: joi.string().pattern(/^([^0-9]*)$/),
-  last_name: joi.string().pattern(/^([^0-9]*)$/),
+  first_name: joi
+    .string()
+    .pattern(/^([^0-9]*)$/)
+    .required(),
+  last_name: joi
+    .string()
+    .pattern(/^([^0-9]*)$/)
+    .required(),
   email: joi
     .string()
     .email({ tlds: { allow: false } })
     .required(),
   phone: joi
     .string()
-    .pattern(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/),
-  address: joi.string(),
-  insurance_name: joi.string().pattern(/^([^0-9]*)$/),
-  insurance_policy: joi.string(),
-  drivers_license_number: joi.string().pattern(/^\d+$/),
+    .pattern(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)
+    .allow(null),
+  address: joi.string().allow(null),
+  insurance_name: joi
+    .string()
+    .pattern(/^([^0-9]*)$/)
+    .allow(null),
+  insurance_policy: joi.string().allow(null),
+  drivers_license_number: joi.string().pattern(/^\d+$/).allow(null),
 });
 
 const Profile = () => {

@@ -20,6 +20,7 @@ import Edit from './pages/Edit';
 import { useEffect } from 'react';
 import { Stack } from '@mui/material';
 import PassConfirm from './pages/PassConfirm';
+import Privacy from './pages/Privacy';
 
 // Hour 2 Start
 const theme = createTheme({
@@ -28,11 +29,13 @@ const theme = createTheme({
       main: '#37474f',
       light: '#62727b',
       dark: '#1c313a',
+      hover: '#435660',
     },
     secondary: {
       main: '#e0e0e0',
       light: '#ffffff',
       dark: '#aeaeae',
+      hover: '#ebebeb',
     },
   },
 });
@@ -79,6 +82,7 @@ const router = createBrowserRouter([
         ),
       },
       { path: '/cancellation', element: <CancellationPolicy /> },
+      { path: '/privacy', element: <Privacy /> },
       { path: '/terms', element: <Terms /> },
       { path: '/user/profile', element: <Profile /> },
       { path: '/user/reservations', element: <Reservations /> },

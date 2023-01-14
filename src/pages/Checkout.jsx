@@ -93,6 +93,10 @@ const Checkout = () => {
   const handleSubmit = async () => {
     if (agree) {
       setReservationLoading(true);
+      // push event to GTM
+      window.dataLayer.push({
+        event: 'create_reservation',
+      });
       const reservation = await axios.post(
         `${process.env.REACT_APP_API_URL}/reservations`,
         {
@@ -135,12 +139,23 @@ const Checkout = () => {
         maxWidth='lg'
         sx={{
           marginTop: '50px',
+          padding: '40px',
         }}
       >
         <Stack
-          justifyContent='space-between'
+          justifyContent='center'
+          gap={10}
           direction={matches ? 'row' : 'column'}
         >
+          <Box>
+            {addOnsLoading || vehicleLoading || !fetchedVehicle ? (
+              <CircularProgress />
+            ) : (
+              <Box mb={15}>
+                <BookingSummary data={summaryData} />
+              </Box>
+            )}
+          </Box>
           <Slide
             direction='down'
             in={submitted}
@@ -179,10 +194,11 @@ const Checkout = () => {
               </Typography>
             </Stack>
           </Slide>
+
           <Stack
             justifyContent='center'
             gap={5}
-            display={agree && submitted ? 'none' : 'flex'}
+            display={submitted ? 'none' : 'flex'}
           >
             <Box
               sx={{
@@ -226,15 +242,6 @@ const Checkout = () => {
               </Button>
             )}
           </Stack>
-          <Box>
-            {addOnsLoading || vehicleLoading || !fetchedVehicle ? (
-              <CircularProgress />
-            ) : (
-              <Box mb={15}>
-                <BookingSummary data={summaryData} />
-              </Box>
-            )}
-          </Box>
         </Stack>
       </Container>
     </>

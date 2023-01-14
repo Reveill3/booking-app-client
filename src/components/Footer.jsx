@@ -21,17 +21,18 @@ const Footer = () => {
         backgroundColor: theme.palette.primary.light,
         minHeight: '200px',
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: { md: 'space-between', xs: 'center' },
+        flexDirection: { md: 'row', xs: 'column' },
         alignItems: 'center',
         padding: { sm: '0 40px', xs: '0 20px' },
+        gap: { md: '0', xs: '20px' },
       }}
     >
-      <Link to='/privacy' style={{ color: 'white' }}>
-        Privacy Policy
-      </Link>
-      <Link to='/privacy' style={{ color: 'white' }}>
-        Contact Us
-      </Link>
+      <Box display='flex' gap={2}>
+        <Link to='/privacy' style={{ color: 'white' }}>
+          Privacy Policy
+        </Link>
+      </Box>
       <Stack direction='row'>
         <IconButton size='large' onClick={() => window.open(admin.facebookurl)}>
           <FacebookIcon sx={{ color: 'white' }} fontSize='large' />
