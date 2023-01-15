@@ -20,10 +20,10 @@ import CreditCardIcon from '@mui/icons-material/CreditCard';
 import { Link, useNavigate } from 'react-router-dom';
 import { DateTime } from 'luxon';
 import useFetch from '../hooks/useFetch';
-import axios from 'axios';
 import { useRef, useState } from 'react';
 import CheckIcon from '@mui/icons-material/Check';
 import ClearIcon from '@mui/icons-material/Clear';
+import { makeRequest } from '../makeRequest';
 
 const ReservationTableRow = ({ reservation, reFetch }) => {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -36,17 +36,9 @@ const ReservationTableRow = ({ reservation, reFetch }) => {
   const handleDelete = async (id) => {
     try {
       setDeleteLoading(true);
-      await axios.post(
-        `/api/reservations/me/${id}`,
-        {
-          entity: 'api::reservation.reservation',
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
-        }
-      );
+      await makeRequest().post(`/reservations/me/${id}`, {
+        entity: 'api::reservation.reservation',
+      });
       reFetch();
       setDeleteLoading(false);
     } catch (error) {

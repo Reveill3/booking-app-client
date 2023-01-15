@@ -6,11 +6,11 @@ import { useState } from 'react';
 import { Box } from '@mui/system';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { DateTime } from 'luxon';
-import axios from 'axios';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { useEffect } from 'react';
 import { setDate } from 'date-fns';
+import { makeRequest } from '../makeRequest';
 
 const Edit = () => {
   const location = useLocation();
@@ -42,7 +42,7 @@ const Edit = () => {
       //check if start date is after current date
       if (DateTime.fromJSDate(startDate) > DateTime.now()) {
         //check if car is available for those dates
-        const available = await axios.post('/api/car/isAvailable', {
+        const available = await makeRequest('noAuth').post('/car/isAvailable', {
           start_date: DateTime.fromJSDate(startDate).toISO(),
           end_date: DateTime.fromJSDate(endDate).toISO(),
           id: location.state.reservation.car.id,
@@ -51,19 +51,14 @@ const Edit = () => {
           location.state.reservation.start = startDate;
           location.state.reservation.end = endDate;
           //update reservation
-          await axios.put(
-            `/api/reservations/${location.state.reservation.id}`,
+          await makeRequest().put(
+            `/reservations/${location.state.reservation.id}`,
             {
               data: {
                 start: DateTime.fromJSDate(startDate).toISO(),
                 end: DateTime.fromJSDate(endDate).toISO(),
               },
               entity: 'api::reservation.reservation',
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-              },
             }
           );
           setUpdateLoading(false);
@@ -93,8 +88,8 @@ const Edit = () => {
   const handleDelete = async (id) => {
     setUpdateLoading(true);
     try {
-      await axios.post(
-        `/api/reservations/me/${id}`,
+      await makeRequest().post(
+        `/reservations/me/${id}`,
         {
           entity: 'api::reservation.reservation',
         },

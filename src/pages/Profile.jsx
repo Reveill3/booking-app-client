@@ -18,7 +18,7 @@ import ClearIcon from '@mui/icons-material/Clear';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import InsertPhotoIcon from '@mui/icons-material/InsertPhoto';
 import useFetch from '../hooks/useFetch';
-import axios from 'axios';
+import { makeRequest } from '../makeRequest';
 import CircularProgress from '@mui/material/CircularProgress';
 import joi from 'joi';
 
@@ -58,10 +58,7 @@ const Profile = () => {
     navigate('/login');
   }
 
-  const { data, loading, error, reFetch } = useFetch(
-    `/api/users/me?populate=*`,
-    'auth'
-  );
+  const { data, loading, error, reFetch } = useFetch(`/users/me?populate=*`);
 
   const [inputs, setInputs] = useState({
     firstName: '',
@@ -143,27 +140,10 @@ const Profile = () => {
         if (inputs.files[1]) {
           insuranceData.append('files', inputs.files[1]);
         }
-        const insurance = await axios.post(
-          `${process.env.REACT_APP_API_URL}/upload`,
-          insuranceData,
-          {
-            headers: {
-              Authorization: 'Bearer ' + localStorage.getItem('token'),
-            },
-          }
-        );
+        const insurance = await makeRequest().post('/upload', insuranceData);
       }
 
-      const updated = await axios.put(
-        `${process.env.REACT_APP_API_URL}/user/me`,
-
-        updatedUser,
-        {
-          headers: {
-            Authorization: 'Bearer ' + localStorage.getItem('token'),
-          },
-        }
-      );
+      const updated = await makeRequest().put(`/user/me`, updatedUser);
       setUploadLoading(false);
 
       reFetch();
@@ -180,14 +160,7 @@ const Profile = () => {
   const handleDelete = async (id) => {
     try {
       setUploadLoading(true);
-      const deletedImg = await axios.delete(
-        `${process.env.REACT_APP_API_URL}/upload/files/${id}`,
-        {
-          headers: {
-            Authorization: 'Bearer ' + localStorage.getItem('token'),
-          },
-        }
-      );
+      const deletedImg = await makeRequest().delete(`/upload/files/${id}`);
       setUploadLoading(false);
       reFetch();
     } catch (error) {

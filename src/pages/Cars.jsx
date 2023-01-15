@@ -10,7 +10,6 @@ import Container from '@mui/material/Container';
 import { Box, Stack } from '@mui/system';
 import styled from '@emotion/styled';
 import { useTheme } from '@emotion/react';
-import ReservationTimeline from '../components/Timeline';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useNavigate } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
@@ -20,6 +19,7 @@ import { BookingContext } from '../context/BookingContext';
 import axios from 'axios';
 import { useEffect } from 'react';
 import Skeleton from '@mui/material/Skeleton';
+import { makeRequest } from '../makeRequest';
 
 const SelectOption = styled('div')(({ theme, position }) => ({
   backgroundImage:
@@ -123,7 +123,8 @@ const Cars = () => {
   const alldates = getDatesInRange(startDate, endDate);
 
   const isAvailable = async (vehicle) => {
-    const isAvailable = await axios.post('/api/car/isAvailable', {
+    // remember adding auth type removes the /api from baseURL
+    const isAvailable = await makeRequest('auth').post('/api/car/isAvailable', {
       id: vehicle,
       start_date: startDate,
       end_date: endDate,

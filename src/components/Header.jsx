@@ -26,7 +26,7 @@ import useFetch from '../hooks/useFetch';
 import { BookingContext } from '../context/BookingContext';
 import { useContext } from 'react';
 import { DateTime } from 'luxon';
-import axios from 'axios';
+import axiosInstance from '../axios.config';
 
 const StyledVideo = styled('video')({
   width: '100%',
@@ -162,7 +162,7 @@ const Header = () => {
       }),
     };
 
-    const logged = await axios(request_config);
+    const logged = await axiosInstance(request_config);
     //if no location selected or date range is on same day, return
     if (
       location === '' ||
@@ -193,7 +193,7 @@ const Header = () => {
     });
 
     if (state.vehicle) {
-      const isAvailable = await axios.post(
+      const isAvailable = await axiosInstance.post(
         '/api/car/isAvailable',
         {
           id: state.vehicle,

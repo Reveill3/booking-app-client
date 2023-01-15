@@ -20,8 +20,8 @@ import { useTheme } from '@mui/material/styles';
 import useFetch from '../hooks/useFetch';
 import moment from 'moment';
 import qs from 'qs';
-import axios from 'axios';
 import { BookingContext } from '../context/BookingContext';
+import { makeRequest } from '../makeRequest';
 
 const TermsLink = styled(Link)({
   textDecoration: 'none',
@@ -97,7 +97,7 @@ const Checkout = () => {
       window.dataLayer.push({
         event: 'create_reservation',
       });
-      const reservation = await axios.post(
+      const reservation = await makeRequest().post(
         `${process.env.REACT_APP_API_URL}/reservations`,
         {
           car: vehicle,
@@ -106,11 +106,6 @@ const Checkout = () => {
           end: endDate,
           totalDays: totalDays,
           add_ons: addOnIds,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
-          },
         }
       );
       dispatch({ type: 'SUBMIT', payload: true });
