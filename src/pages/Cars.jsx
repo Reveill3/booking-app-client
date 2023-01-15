@@ -124,7 +124,7 @@ const Cars = () => {
 
   const isAvailable = async (vehicle) => {
     // remember adding auth type removes the /api from baseURL
-    const isAvailable = await makeRequest('auth').post('/api/car/isAvailable', {
+    const isAvailable = await makeRequest().post('/car/isAvailable', {
       id: vehicle,
       start_date: startDate,
       end_date: endDate,

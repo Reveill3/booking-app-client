@@ -128,14 +128,18 @@ const Header = () => {
       return;
     }
 
-    // check that start time is at least trip buffer from now
+    // if start date is today, check that start time is at least trip buffer from now
     if (
-      DateTime.fromJSDate(startTime) <
-      DateTime.local().plus({ hours: tripBuffer })
+      DateTime.fromJSDate(dateRange.startDate).hasSame(DateTime.local(), 'day')
     ) {
-      setBufferError(true);
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      return;
+      if (
+        DateTime.fromJSDate(startTime) <
+        DateTime.local().plus({ hours: tripBuffer })
+      ) {
+        setBufferError(true);
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        return;
+      }
     }
     setBufferError(false);
     setDateError(false);

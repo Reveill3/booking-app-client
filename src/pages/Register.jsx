@@ -2,9 +2,9 @@ import { useTheme } from '@emotion/react';
 import { Box, Button, TextField, Typography } from '@mui/material';
 import { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { BookingContext } from '../context/BookingContext';
 import moment from 'moment';
+import { makeRequest } from '../makeRequest';
 
 const Register = () => {
   const theme = useTheme();
@@ -30,14 +30,14 @@ const Register = () => {
       return;
     }
     try {
-      const newUser = await axios.post('/api/auth/local/register', {
+      const newUser = await makeRequest().post('/auth/local/register', {
         username: email,
         email,
         password,
       });
 
       try {
-        const userData = await axios.post('/api/auth/local', {
+        const userData = await makeRequest().post('/auth/local', {
           identifier: email,
           password: password,
         });

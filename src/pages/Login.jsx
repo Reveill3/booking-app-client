@@ -2,10 +2,10 @@ import { useTheme } from '@emotion/react';
 import { Alert, Box, Button, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
 import { Link, redirect, useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import moment from 'moment';
 import joi from 'joi';
 import CircularProgress from '@mui/material/CircularProgress';
+import { makeRequest } from '../makeRequest';
 
 const schema = joi.object({
   email: joi
@@ -43,11 +43,10 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const userData = await axios.post('/api/auth/local', {
+      const userData = await makeRequest().post('/auth/local', {
         identifier: email,
         password: password,
       });
-      console.log(userData);
       localStorage.setItem('token', userData.data.jwt);
       localStorage.setItem(
         'expiresAt',
@@ -83,7 +82,7 @@ const Login = () => {
 
     setLoading(true);
 
-    const resetResponse = await axios.post('/api/auth/forgot-password', {
+    const resetResponse = await makeRequest().post('/auth/forgot-password', {
       email: email,
     });
 
