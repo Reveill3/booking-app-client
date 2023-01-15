@@ -14,13 +14,14 @@ import styled from '@emotion/styled';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import { DateRangePicker } from 'mui-daterange-picker';
+import { MobileDatePicker } from '@mui/x-date-pickers/MobileDatePicker';
 import { useState } from 'react';
 import { FormGroup } from '@mui/material';
 import { format } from 'date-fns';
 import './header.css';
 import { useNavigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { AdapterLuxon } from '@mui/x-date-pickers/AdapterLuxon';
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import useFetch from '../hooks/useFetch';
 import { BookingContext } from '../context/BookingContext';
@@ -83,8 +84,8 @@ const Header = () => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [dateRange, setDateRange] = useState({
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: DateTime.local(),
+    endDate: DateTime.local(),
   });
   const [bufferError, setBufferError] = useState(false);
   const [location, setLocation] = useState('');
@@ -102,14 +103,14 @@ const Header = () => {
   const { state, dispatch } = useContext(BookingContext);
 
   // combine dateRange.startDate with startTime and dateRange.endDate with endTime using luxon
-  const combinedStart = DateTime.fromJSDate(dateRange.startDate).set({
-    hour: startTime.getHours(),
-    minute: startTime.getMinutes(),
+  const combinedStart = DateTime.fromISO(dateRange.startDate).set({
+    hour: startTime.hour,
+    minute: startTime.minute,
   });
 
-  const combinedEnd = DateTime.fromJSDate(dateRange.endDate).set({
-    hour: endTime.getHours(),
-    minute: endTime.getMinutes(),
+  const combinedEnd = DateTime.fromISO(dateRange.endDate).set({
+    hour: endTime.hour,
+    minute: endTime.minute,
   });
 
   const { data, loading, error } = useFetch('/locations');
@@ -118,10 +119,10 @@ const Header = () => {
   const checkAvailability = async () => {
     // check that selected times are after location opening time and before closing time
     if (
-      startTime.getHours() < openHours ||
-      startTime.getHours() > closeHours ||
-      endTime.getHours() < openHours ||
-      endTime.getHours() > closeHours
+      startTime.hour < openHours ||
+      startTime.hour > closeHours ||
+      endTime.hour < openHours ||
+      endTime.hour > closeHours
     ) {
       setDateError(true);
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
@@ -129,13 +130,8 @@ const Header = () => {
     }
 
     // if start date is today, check that start time is at least trip buffer from now
-    if (
-      DateTime.fromJSDate(dateRange.startDate).hasSame(DateTime.local(), 'day')
-    ) {
-      if (
-        DateTime.fromJSDate(startTime) <
-        DateTime.local().plus({ hours: tripBuffer })
-      ) {
+    if (dateRange.startDate.hasSame(DateTime.local(), 'day')) {
+      if (DateTime.fromISO(startTime).diff(endTime).milliseconds < 0) {
         setBufferError(true);
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         return;
@@ -170,7 +166,7 @@ const Header = () => {
     //if no location selected or date range is on same day, return
     if (
       location === '' ||
-      dateRange.startDate.getDate() === dateRange.endDate.getDate() ||
+      dateRange.startDate.startOf('day') === dateRange.endDate.startOf('day') ||
       combinedStart > combinedEnd ||
       combinedStart < DateTime.now()
     ) {
@@ -309,7 +305,35 @@ const Header = () => {
                   <Typography variant='h6' color={theme.palette.primary.main}>
                     Rental Dates
                   </Typography>
-                  <Typography
+                  {/* Start and end date pickers */}
+                  <Box display='flex' gap={1}>
+                    <LocalizationProvider dateAdapter={AdapterLuxon}>
+                      <MobileDatePicker
+                        label='Start Date'
+                        value={dateRange.startDate}
+                        onChange={(value) => {
+                          setDateRange({
+                            ...dateRange,
+                            startDate: value,
+                          });
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                        minDate={DateTime.now().minus({ days: 1 }).toISO()}
+                      />
+                    </LocalizationProvider>
+                    <LocalizationProvider dateAdapter={AdapterLuxon}>
+                      <MobileDatePicker
+                        label='End Date'
+                        value={dateRange.endDate}
+                        onChange={(value) => {
+                          setDateRange({ ...dateRange, endDate: value });
+                        }}
+                        renderInput={(params) => <TextField {...params} />}
+                        minDate={DateTime.now().minus({ days: 1 }).toISO()}
+                      />
+                    </LocalizationProvider>
+                  </Box>
+                  {/* <Typography
                     color={theme.palette.primary.main}
                     variant='body1'
                     sx={{ flex: 1, border: '1px solid #000', padding: '5px' }}
@@ -317,9 +341,9 @@ const Header = () => {
                   >
                     {`${format(dateRange.startDate, 'MM/dd/yyyy')} to
                   ${format(dateRange.endDate, 'MM/dd/yyyy')}`}
-                  </Typography>
+                  </Typography> */}
                   <Box sx={{ marginTop: '10px', display: 'flex', gap: '10px' }}>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterLuxon}>
                       <MobileTimePicker
                         label='Start Time'
                         value={startTime}
@@ -335,7 +359,7 @@ const Header = () => {
                         })}
                       />
                     </LocalizationProvider>
-                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <LocalizationProvider dateAdapter={AdapterLuxon}>
                       <MobileTimePicker
                         label='End Time'
                         value={endTime}
