@@ -37,14 +37,14 @@ const SearchBarPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,
   border: '5px solid #000000',
   width: '80vw',
-  height: '155px',
+  height: '195px',
   borderRadius: '40px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   [theme.breakpoints.down('md')]: {
     width: '90vw',
-    height: '230px',
+    height: '260px',
     padding: '40px',
   },
 }));
@@ -259,6 +259,7 @@ const Header = () => {
         autoPlay
         loop
         muted
+        playsInline
       />
       <Box
         sx={{
@@ -276,7 +277,7 @@ const Header = () => {
                 <InputLabel
                   id='locationLabel'
                   sx={{
-                    top: { xs: '0px', md: '38px' },
+                    top: { xs: '0px', md: '57px' },
                   }}
                 >
                   Pickup/Return Location
@@ -301,7 +302,13 @@ const Header = () => {
                     }
                   })}
                 </StyledSelect>
-                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                  }}
+                >
                   <Typography variant='h6' color={theme.palette.primary.main}>
                     Rental Dates
                   </Typography>

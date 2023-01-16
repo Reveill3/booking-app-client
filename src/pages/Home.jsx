@@ -9,10 +9,8 @@ import { useContext, useEffect } from 'react';
 import { BookingContext } from '../context/BookingContext';
 
 const StyledBox = styled(Container)(({ theme }) => ({
-  overflow: 'scroll',
   '&::-webkit-scrollbar': { display: 'none' },
   backgroundColor: theme.palette.secondary.dark,
-  height: '100vh',
 }));
 
 const Home = () => {
