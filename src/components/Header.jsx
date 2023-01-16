@@ -55,7 +55,7 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
   alignItems: 'center',
   justifyContent: 'center',
   flexDirection: 'row',
-  gap: '20px',
+  gap: '15px !important',
   [theme.breakpoints.down('md')]: {
     flexDirection: 'column',
     gap: '0',
@@ -274,34 +274,6 @@ const Header = () => {
           <SearchBarPaper>
             <FormGroup sx={{ width: '90%' }}>
               <StyledFormControl>
-                <InputLabel
-                  id='locationLabel'
-                  sx={{
-                    top: { xs: '0px', md: '57px' },
-                  }}
-                >
-                  Pickup/Return Location
-                </InputLabel>
-                <StyledSelect
-                  labelId='locationLabel'
-                  id='location'
-                  sx={{
-                    flex: 1,
-                  }}
-                  label='Pickup/Return Location'
-                  value={location}
-                  onChange={(e) => selectLocation(e.target.value)}
-                >
-                  {data?.data.map((location) => {
-                    if (location.attributes.visible) {
-                      return (
-                        <MenuItem key={location.id} value={location.id}>
-                          {location.attributes.name}
-                        </MenuItem>
-                      );
-                    }
-                  })}
-                </StyledSelect>
                 <Box
                   sx={{
                     display: 'flex',
@@ -384,6 +356,31 @@ const Header = () => {
                     </LocalizationProvider>
                   </Box>
                 </Box>
+                <FormControl sx={{ width: '100%' }}>
+                  <InputLabel id='locationLabel'>
+                    Pickup/Return Location
+                  </InputLabel>
+                  <StyledSelect
+                    labelId='locationLabel'
+                    id='location'
+                    sx={{
+                      flex: 1,
+                    }}
+                    label='Pickup/Return Location'
+                    value={location}
+                    onChange={(e) => selectLocation(e.target.value)}
+                  >
+                    {data?.data.map((location) => {
+                      if (location.attributes.visible) {
+                        return (
+                          <MenuItem key={location.id} value={location.id}>
+                            {location.attributes.name}
+                          </MenuItem>
+                        );
+                      }
+                    })}
+                  </StyledSelect>
+                </FormControl>
               </StyledFormControl>
             </FormGroup>
           </SearchBarPaper>

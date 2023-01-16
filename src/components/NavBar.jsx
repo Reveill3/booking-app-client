@@ -154,10 +154,7 @@ const NavBar = () => {
             style={{ textDecoration: 'none' }}
             to={localStorage.getItem('token') ? 'user/reservations' : '/login'}
           >
-            <SpacedButton
-              sx={{ width: '100%' }}
-              onClick={() => setAnchorEl(null)}
-            >
+            <SpacedButton onClick={() => setAnchorEl(null)}>
               {localStorage.getItem('token') ? 'Reservations' : 'Login'}
             </SpacedButton>
           </Link>
