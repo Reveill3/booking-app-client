@@ -39,7 +39,7 @@ const About = () => {
 
   const matches = useMediaQuery(theme.breakpoints.up('sm'));
   return (
-    <Box sx={{ paddingBottom: '20px' }}>
+    <Box sx={{ paddingBottom: '20px', marginTop: '40px' }}>
       <Stack
         sx={{
           gap: '40px',

@@ -36,7 +36,7 @@ const StyledVideo = styled('video')({
 const SearchBarPaper = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.secondary.main,
   border: '5px solid #000000',
-  width: '80vw',
+  width: '50vw',
   height: '195px',
   borderRadius: '40px',
   display: 'flex',
@@ -264,7 +264,7 @@ const Header = () => {
       <Box
         sx={{
           position: 'absolute',
-          bottom: { xs: '-200px', md: '-25px' },
+          bottom: { xs: '-200px', md: '-90px' },
           width: '100%',
           display: 'flex',
           justifyContent: 'center',
