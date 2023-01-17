@@ -79,6 +79,15 @@ const Checkout = () => {
 
   const totalDays = moment(endDate).diff(startDate, 'days', true).toFixed(2);
 
+  const getPrice = async () => {
+    const price = await makeRequest().post('/reservation/getPrice', {
+      location: location.id,
+      car: vehicle,
+      totalDays: totalDays,
+    });
+    return price;
+  };
+
   const MS_IN_DAY = 1000 * 60 * 60 * 24;
 
   const matches = useMediaQuery(useTheme().breakpoints.up('md'));
@@ -92,10 +101,12 @@ const Checkout = () => {
   const addOnIds = addOns?.data.map((addOn) => addOn.id);
   const handleSubmit = async () => {
     if (agree) {
+      const value = await getPrice();
       setReservationLoading(true);
       // push event to GTM
       window.dataLayer.push({
         event: 'create_reservation',
+        total: value.data,
       });
       const reservation = await makeRequest().post(
         `${process.env.REACT_APP_API_URL}/reservations`,
